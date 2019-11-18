@@ -13,7 +13,7 @@ public class MovieRating {
         return this.rating;
     }
 
-    public int getMovie() {
+    public int getMovieId() {
         return this.movieId;
     }
 
@@ -21,7 +21,7 @@ public class MovieRating {
         this.rating = r;
     }
 
-    public void setMovie(int p) {
+    public void setMovieId(int p) {
         this.movieId = p;
     }
 

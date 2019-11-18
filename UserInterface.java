@@ -1,6 +1,8 @@
 import java.util.Scanner;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Arrays;
 
 import classes.Movie;
 import classes.MovieRating;
@@ -27,6 +29,7 @@ public class UserInterface {
             System.out.println(" 5 - show list of ratings from a specific user");
             System.out.println(" 6 - show ratings info for a specific MovieNight user");
             System.out.println(" 7 - show list of ratings from a specific MovieNight user");
+            System.out.println(" 8 - show similar users for a specific MovieNight user");
             System.out.println("-------------------------------------");
             System.out.println("");
 
@@ -50,6 +53,8 @@ public class UserInterface {
                 ratingsOfOneMovieNightUser(inputReader);
             } else if (command.equals("7")) {
                 listOfRaitingsOfOneMovieNightUser(inputReader);
+            } else if (command.equals("8")) {
+                similarUsers(inputReader);
             } else {
                 System.out.println("Unknown command. Try again. (press 'x' to stop the application)");
             }
@@ -155,7 +160,7 @@ public class UserInterface {
                 ArrayList<MovieRating> listOfRatings = userRatings.get(num);
                 System.out.println("The ratings for the user " + num + " are the following");
                 for (MovieRating r : listOfRatings) {
-                    int movie = r.getMovie();
+                    int movie = r.getMovieId();
 
                     System.out.println(movies.get(movie).getTitle() + " was rated " + r.getRating());
                 }
@@ -204,8 +209,31 @@ public class UserInterface {
             ArrayList<MovieRating> listOfRatings = movieNightUserRatings.get(name);
             System.out.println("The ratings for the user " + name + " are the following");
             for (MovieRating r : listOfRatings) {
-                int movie = r.getMovie();
+                int movie = r.getMovieId();
                 System.out.println(movies.get(movie).getTitle() + " was rated " + r.getRating());
+            }
+        }
+    }
+
+    public void similarUsers(Scanner inputReader) {
+        HashMap<String, ArrayList<MovieRating>> movieNightUserRatings = this.dataController.getMovieNightUserRatings();
+
+        System.out.println();
+        System.out.println("Which MovieNight user are you interested in?");
+        System.out.print("MovieNight user (name): ");
+        
+        String name = inputReader.nextLine();
+        if (!movieNightUserRatings.containsKey(name)) {
+            System.out.println("There are no users with that name using MovieNight!");
+        } else {
+            HashMap<Integer, HashSet<Integer>> similarUsers = this.dataController.getSimilarUsers(name);
+    
+            System.out.println();
+            System.out.println(similarUsers.size() + " users have rated at least 4 movies that MovieNight user " + name + " also has rated");
+            System.out.println("Similar users for MovieNight user " + name + " are the following");
+            for (Integer i : similarUsers.keySet()) {
+                HashSet<Integer> s = similarUsers.get(i);
+                System.out.println("User " + i + " has rated movies " + Arrays.toString(s.toArray()));
             }
         }
     }

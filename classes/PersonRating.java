@@ -13,7 +13,7 @@ public class PersonRating {
         return this.rating;
     }
 
-    public int getPerson() {
+    public int getPersonId() {
         return this.personId;
     }
 
@@ -21,7 +21,7 @@ public class PersonRating {
         this.rating = r;
     }
 
-    public void setPerson(int p) {
+    public void setPersonId(int p) {
         this.personId = p;
     }
 
