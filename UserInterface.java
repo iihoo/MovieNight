@@ -60,7 +60,7 @@ public class UserInterface {
     }
 
     public void printMovies() {
-        HashMap<Integer, String> movies = this.dataController.getMovies();
+        HashMap<Integer, Movie> movies = this.dataController.getMovies();
 
         System.out.println();
         System.out.println("The database contains the following movies:");
@@ -72,7 +72,7 @@ public class UserInterface {
 
     public void ratingsOfOneUser(Scanner inputReader) {
         HashMap<Integer, ArrayList<PersonRating>> movieRatings = dataController.getMovieRatings();
-        HashMap<Integer, String> movies = this.dataController.getMovies();
+        HashMap<Integer, Movie> movies = this.dataController.getMovies();
 
         System.out.println();
         System.out.println("Which movie are you interested in?");
@@ -94,7 +94,7 @@ public class UserInterface {
 
                 System.out.println("There are " + numberOfRatings + " ratings for the movie " + movies.get(num));
                 System.out.println("The average score is " + avg);
-                System.out.println("The ratings for movie " + movies.get(num) + " are the following");
+                System.out.println("The ratings for movie " + movies.get(num).getTitle() + " are the following");
 
                 for (PersonRating r : listOfRatings) {
                     System.out.println(r);
@@ -136,7 +136,7 @@ public class UserInterface {
 
     public void listOfRaitingsOfOneUser(Scanner inputReader) {
         HashMap<Integer, ArrayList<MovieRating>> userRatings = dataController.getUserRatings();
-        HashMap<Integer, String> movies = this.dataController.getMovies();
+        HashMap<Integer, Movie> movies = this.dataController.getMovies();
 
         System.out.println();
         System.out.println("Which user are you interested in?");
@@ -153,7 +153,7 @@ public class UserInterface {
                 for (MovieRating r : listOfRatings) {
                     int movie = r.getMovie();
 
-                    System.out.println(movies.get(movie) + " was rated " + r.getRating());
+                    System.out.println(movies.get(movie).getTitle() + " was rated " + r.getRating());
                 }
             }
         } catch (NumberFormatException e) {
@@ -187,7 +187,7 @@ public class UserInterface {
 
     public void listOfRaitingsOfOneMovieNightUser(Scanner inputReader) {
         HashMap<String, ArrayList<MovieRating>> movieNightUserRatings = this.dataController.getMovieNightUserRatings();
-        HashMap<Integer, String> movies = this.dataController.getMovies();
+        HashMap<Integer, Movie> movies = this.dataController.getMovies();
 
         System.out.println();
         System.out.println("Which MovieNight user are you interested in?");
@@ -201,7 +201,7 @@ public class UserInterface {
             System.out.println("The ratings for the user " + name + " are the following");
             for (MovieRating r : listOfRatings) {
                 int movie = r.getMovie();
-                System.out.println(movies.get(movie) + " was rated " + r.getRating());
+                System.out.println(movies.get(movie).getTitle() + " was rated " + r.getRating());
             }
         }
     }

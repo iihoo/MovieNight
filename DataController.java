@@ -2,8 +2,7 @@ import java.util.Scanner;
 import java.io.File;
 import java.util.HashMap;
 import java.util.ArrayList;
-
-
+import java.util.Arrays;
 
 public class DataController {
 
@@ -11,7 +10,7 @@ public class DataController {
     private HashMap<Integer, ArrayList<PersonRating>> movieRatings;
 
     // movies and their titles (movieId is the HashMap key)
-    private HashMap<Integer, String> movies;
+    private HashMap<Integer, Movie> movies;
 
     // users and which movies they have rated (userId is the HashMap key)
     private HashMap<Integer, ArrayList<MovieRating>> userRatings;
@@ -19,11 +18,15 @@ public class DataController {
     // MovieNight users and which movies they have rated (name is the HashMap key)
     private HashMap<String, ArrayList<MovieRating>> movieNightUserRatings;
 
+    // MovieNight users and the genres they prefer (name is the HashMap key)
+    private HashMap<String, String> movieNightUserGenres;
+
     public DataController() {
         this.movieRatings = new HashMap<>();
         this.movies = new HashMap<>();
         this.userRatings = new HashMap<>();
         this.movieNightUserRatings = new HashMap<>();
+        this.movieNightUserGenres = new HashMap<>();
 
         // let's load the ratings (userId + movieId + rating)
         loadRatingsData();
@@ -39,6 +42,7 @@ public class DataController {
         list1.add(new MovieRating(32, 3.5));
         list1.add(new MovieRating(48, 0.5));
         this.movieNightUserRatings.put("Lassi", list1);
+        this.movieNightUserGenres.put("Lassi", "Romance");
 
         ArrayList<MovieRating> list2 = new ArrayList<>();
         list2.add(new MovieRating(1, 4));
@@ -47,6 +51,7 @@ public class DataController {
         list2.add(new MovieRating(26, 3));
         list2.add(new MovieRating(193609, 0.5));
         this.movieNightUserRatings.put("Leevi", list2);
+        this.movieNightUserGenres.put("Leevi", "Drama");
 
         ArrayList<MovieRating> list3 = new ArrayList<>();
         list3.add(new MovieRating(1, 2.5));
@@ -56,11 +61,12 @@ public class DataController {
         list3.add(new MovieRating(193609, 5));
         list3.add(new MovieRating(179135, 4.5));
         this.movieNightUserRatings.put("Karvinen", list3);
+        this.movieNightUserGenres.put("Karvinen", "Drama");
     }
 
     public void loadRatingsData() {
         // let's create a Scanner to load the data from File
-        // the data includes movie ratings in following way (whitespace/tab separated)
+        // the data includes movie ratings in following way
         // 'userid' 'item' 'id' 'rating' 'time stamp'
         // (we are not interested in the time stamp)
         try (Scanner dataReader = new Scanner(new File("ratings.csv"))) {
@@ -110,8 +116,8 @@ public class DataController {
     public void loadMovieData() {
         // let's create a Scanner to load the data from File
         // the data includes movie info in following way (whitespace/tab separated)
-        // movie id movie title etc etc
-        // (at the moment we are only interested in the movie id and movie title)
+        // 'movie-id' 'movie title' 'genres'
+        // (at the moment we are only interested in the movie id, movie title and movie genres)
         try (Scanner dataReader = new Scanner(new File("movies.csv"))) {
             // we will ignore the first one as it contains the column names
             dataReader.nextLine();
@@ -119,12 +125,18 @@ public class DataController {
             // let's read the file line by line
             while (dataReader.hasNextLine()) {
                 String[] parts = dataReader.nextLine().split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
-                // System.out.println(parts[0] + " and " + parts[1]);
+                //System.out.println(parts[0] + " and " + parts[1] + " and " + parts[2]);
 
                 int movieId = Integer.parseInt(parts[0]);
                 String title = parts[1];
+                
+                String[] g = parts[2].split("\\|");
+                ArrayList<String> genres = new ArrayList<>(Arrays.asList(g));
+                
+                Movie movie = new Movie(title, genres);
 
-                this.movies.put(movieId, title);
+
+                this.movies.put(movieId, movie);
             }
             System.out.println();
             System.out.println("File read ('movies.csv').");
@@ -137,7 +149,7 @@ public class DataController {
         return this.movieRatings;
     }
 
-    public HashMap<Integer, String> getMovies() {
+    public HashMap<Integer, Movie> getMovies() {
         return this.movies;
     }
 
