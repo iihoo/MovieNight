@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import classes.Movie;
+import classes.MovieRating;
+import classes.PersonRating;
+
 public class DataController {
 
     // movies and their ratings in the dataset (movieId is the HasHMap key)

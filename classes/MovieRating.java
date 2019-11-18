@@ -1,3 +1,5 @@
+package classes;
+
 public class MovieRating {
     private int movieId;
     private double rating;

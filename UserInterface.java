@@ -2,6 +2,10 @@ import java.util.Scanner;
 import java.util.HashMap;
 import java.util.ArrayList;
 
+import classes.Movie;
+import classes.MovieRating;
+import classes.PersonRating;
+
 public class UserInterface {
     private DataController dataController;
 

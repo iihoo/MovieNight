@@ -1,3 +1,5 @@
+package classes;
+
 public class PersonRating {
     private int personId;
     private double rating;
