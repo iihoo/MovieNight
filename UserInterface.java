@@ -4,8 +4,6 @@ import java.util.HashSet;
 import java.util.Arrays;
 
 import classes.Movie;
-import classes.MovieRating;
-import classes.PersonRating;
 
 public class UserInterface {
     private DataController dataController;
@@ -92,19 +90,20 @@ public class UserInterface {
                 System.out.println("That movieId is not used in the database!");
             } else {
                 int numberOfRatings = 0;
-                int sum = 0;
-                for (PersonRating r : dataController.getMovieRatings().get(num).values()) {
+                double sum = 0.0;
+                for (Double r : dataController.getMovieRatings().get(num).values()) {
                     numberOfRatings ++;
-                    sum += r.getRating();
+                    sum += r;
                 }
-                double avg = new Double(sum) / numberOfRatings;
+                double avg = sum / numberOfRatings;
 
                 System.out.println("There are " + numberOfRatings + " ratings for the movie " + movies.get(num));
                 System.out.println("The average score is " + avg);
                 System.out.println("The ratings for movie " + movies.get(num).getTitle() + " are the following");
 
-                for (PersonRating r : dataController.getMovieRatings().get(num).values()) {
-                    System.out.println(r);
+                for (Integer i : dataController.getMovieRatings().get(num).keySet()) {
+                    System.out.println("User " + i + " gave a rating of " + dataController.getMovieRatings().get(num).get(i));
+                    
                 }
             }
         } catch (NumberFormatException e) {
@@ -125,12 +124,12 @@ public class UserInterface {
                 System.out.println("There are no users with that id in the dataset!");
             } else {
                 int numberOfRatings = 0;
-                int sum = 0;
-                for (MovieRating r : dataController.getUserRatings().get(num).values()) {
+                double sum = 0.0;
+                for (Double r : dataController.getUserRatings().get(num).values()) {
                     numberOfRatings ++;
-                    sum += r.getRating();
+                    sum += r;
                 }
-                double avg = new Double(sum) / numberOfRatings;
+                double avg = sum / numberOfRatings;
 
                 System.out.println("There are " + numberOfRatings + " ratings for the user " + num);
                 System.out.println("The average score is " + avg);
@@ -154,10 +153,10 @@ public class UserInterface {
                 System.out.println("There are no users with that id in the dataset!");
             } else {
                 System.out.println("The ratings for the user " + num + " are the following");
-                for (MovieRating r : dataController.getUserRatings().get(num).values()) {
-                    int movie = r.getMovieId();
+                for (Integer i : dataController.getUserRatings().get(num).keySet()) {
+                    double r = dataController.getUserRatings().get(num).get(i);
 
-                    System.out.println(movies.get(movie).getTitle() + " was rated " + r.getRating());
+                    System.out.println(movies.get(i).getTitle() + " was rated " + r);
                 }
             }
         } catch (NumberFormatException e) {
@@ -176,12 +175,12 @@ public class UserInterface {
             System.out.println("There are no users with that name using MovieNight!");
         } else {
             int numberOfRatings = 0;
-            int sum = 0;
-            for (MovieRating r : this.dataController.getMovieNightUsers().get(name).getMovieRatings().values()) {
+            double sum = 0.0;
+            for (Double r : this.dataController.getMovieNightUsers().get(name).getMovieRatings().values()) {
                 numberOfRatings ++;
-                sum += r.getRating();
+                sum += r;
             }
-            double avg = new Double(sum) / numberOfRatings;
+            double avg = sum / numberOfRatings;
 
             System.out.println("There are " + numberOfRatings + " ratings for the MovieNight user " + name);
             System.out.println("The average score is " + avg);
@@ -200,9 +199,9 @@ public class UserInterface {
             System.out.println("There are no users with that name using MovieNight!");
         } else {
             System.out.println("The ratings for the user " + name + " are the following");
-            for (MovieRating r : this.dataController.getMovieNightUsers().get(name).getMovieRatings().values()) {
-                int movie = r.getMovieId();
-                System.out.println(movies.get(movie).getTitle() + " was rated " + r.getRating());
+            for (Integer i : this.dataController.getMovieNightUsers().get(name).getMovieRatings().keySet()) {
+                double r = this.dataController.getMovieNightUsers().get(name).getMovieRatings().get(i);
+                System.out.println(movies.get(i).getTitle() + " was rated " + r);
             }
         }
     }

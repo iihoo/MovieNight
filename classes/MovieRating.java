@@ -1,9 +1,7 @@
 package classes;
 
-//  lisää toiminnalisuus vertailuun, että saadaan lisättyä jonoon oikeaan järjestykseen
-
 // Each MovieRating includes the movie id and a rating
-public class MovieRating {
+public class MovieRating implements Comparable<MovieRating>{
     private int movieId;
     private double rating;
 
@@ -26,6 +24,18 @@ public class MovieRating {
 
     public void setMovieId(int p) {
         this.movieId = p;
+    }
+
+    @Override
+    public int compareTo(MovieRating m) {
+        if (this.rating > m.rating) {
+            return -1;
+        } else if (this.rating < m.rating) {
+            return 1;
+        } else {
+            return 0;
+        }
+        
     }
 
     @Override

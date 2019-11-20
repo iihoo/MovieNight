@@ -7,13 +7,13 @@ import java.util.HashMap;
 public class MovieNightUser {
     private String nimi;                                    // -- name of the user
     private String genre;                                   // -- the preferred genre
-    private HashMap<Integer, MovieRating> movieratings;     // -- rated movies, movie id is the key for hashmap
+    private HashMap<Integer, Double> movieratings;     // -- rated movies, movie id is the key for hashmap
     private PriorityQueue<UserSimilarity> userSimilarity;   // -- for similar users the calculated similarity value is saved here in order
     private HashSet<Integer> moviesNotSeen;                 // -- all the movies that MovieNight user has not seen 
                                                             //    (from the set of movies that his/her similar users have rated)
     private PriorityQueue<MovieRating> recommendedMovies;   // -- the movies from moviesNotSeen with predicted ratings for the MovieNightUser
 
-    public MovieNightUser(String nimi, HashMap<Integer, MovieRating> movieratings, String genre) {
+    public MovieNightUser(String nimi, HashMap<Integer, Double> movieratings, String genre) {
         this.nimi = nimi;
         this.movieratings = movieratings;
         this.genre = genre;
@@ -27,7 +27,7 @@ public class MovieNightUser {
         return this.nimi;
     }
 
-    public HashMap<Integer, MovieRating> getMovieRatings() {
+    public HashMap<Integer, Double> getMovieRatings() {
         return this.movieratings;
     }
 

@@ -7,8 +7,6 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 
 import classes.Movie;
-import classes.MovieRating;
-import classes.PersonRating;
 import classes.MovieNightUser;
 import classes.UserSimilarity;
 
@@ -21,26 +19,19 @@ public class DataController {
     // for each movie in the dataset the rating is saved
     // movieId is the 'outer' HashMap key.
     // for the 'inner' HashMap the user id is the key
-    private HashMap<Integer, HashMap<Integer, PersonRating>> movieRatings;
+    private HashMap<Integer, HashMap<Integer, Double>> movieRatings;
+    //private HashMap<Integer, HashMap<Integer, PersonRating>> movieRatings;
 
     // movies and their titles (movieId is the HashMap key)
     private HashMap<Integer, Movie> movies;
 
     // users and which movies they have rated (userId is the HashMap key)
-    private HashMap<Integer, HashMap<Integer, MovieRating>> userRatings;
-
-    // MovieNight users and which movies they have rated (name is the HashMap key)
-    // private HashMap<String, ArrayList<MovieRating>> movieNightUserRatings;
-
-    // MovieNight users and the genres they prefer (name is the HashMap key)
-    // private HashMap<String, String> movieNightUserGenres;
+    private HashMap<Integer, HashMap<Integer, Double>> userRatings;
 
     public DataController() {
         this.movieRatings = new HashMap<>();
         this.movies = new HashMap<>();
         this.userRatings = new HashMap<>();
-        //this.movieNightUserRatings = new HashMap<>();
-        //this.movieNightUserGenres = new HashMap<>();
         this.movieNightUsers = new HashMap<>();
 
         // let's load the ratings (userId + movieId + rating)
@@ -50,42 +41,36 @@ public class DataController {
         loadMovieData();
 
         // let's add a couple of test users for the system
-        HashMap<Integer, MovieRating> list1 = new HashMap<>();
-        list1.put(1, new MovieRating(1, 2.5)); // Toy Story
-        list1.put(2, new MovieRating(2, 4)); // Jumanji
-        list1.put(19, new MovieRating(19, 5)); // Ace Ventura
-        list1.put(32, new MovieRating(32, 3.5)); // 12 Monkeys
-        list1.put(48, new MovieRating(48, 0.5)); // Pocahontas
-        list1.put(224, new MovieRating(224, 2.0)); // Don Juan DeMarco
-        list1.put(949, new MovieRating(949, 1.5)); // East of Eden
-        //this.movieNightUserRatings.put("Lassi", list1);
-        //this.movieNightUserGenres.put("Lassi", "Romance");
+        HashMap<Integer, Double> list1 = new HashMap<>();
+        list1.put(1, 2.5); // Toy Story
+        list1.put(2, 4.0); // Jumanji
+        list1.put(19, 5.0); // Ace Ventura
+        list1.put(32, 3.5); // 12 Monkeys
+        list1.put(48, 0.5); // Pocahontas
+        list1.put(224, 2.0); // Don Juan DeMarco
+        list1.put(949, 1.5); // East of Eden
 
         this.movieNightUsers.put("Lassi", new MovieNightUser("Lassi", list1, "Romance"));
 
-        HashMap<Integer, MovieRating> list2 = new HashMap<>();
-        list2.put(1, new MovieRating(1, 4)); // Toy Story
-        list2.put(19, new MovieRating(19, 2)); // Ace Venture
-        list2.put(48, new MovieRating(48, 4.5)); // Pocahontas
-        list2.put(79132, new MovieRating(79132, 3)); // Inception
-        list2.put(193609, new MovieRating(193609, 0.5)); // Andrew Dice Clay
-        list2.put(2085, new MovieRating(2085, 4)); // 101 Dalmatians
-        list2.put(2382, new MovieRating(2382, 2.5)); // Police Academy 5
-        //this.movieNightUserRatings.put("Leevi", list2);
-        //this.movieNightUserGenres.put("Leevi", "Drama");
+        HashMap<Integer, Double> list2 = new HashMap<>();
+        list2.put(1, 4.0); // Toy Story
+        list2.put(19, 2.0); // Ace Venture
+        list2.put(48, 4.5); // Pocahontas
+        list2.put(79132, 3.0); // Inception
+        list2.put(193609, 0.5); // Andrew Dice Clay
+        list2.put(2085, 4.0); // 101 Dalmatians
+        list2.put(2382, 2.5); // Police Academy 5
 
         this.movieNightUsers.put("Leevi", new MovieNightUser("Leevi", list2, "Drama"));
 
-        HashMap<Integer, MovieRating> list3 = new HashMap<>();
-        list3.put(1, new MovieRating(1, 2.5)); // Toy Story
-        list3.put(19, new MovieRating(19, 3)); // Ace Venture
-        list3.put(189713, new MovieRating(189713, 3.5)); // BlacKkKlansman
-        list3.put(32, new MovieRating(32, 5)); // 12 Monkeys
-        list3.put(104, new MovieRating(104, 5)); // Happy Gilmore
-        list3.put(1721, new MovieRating(1721, 4.5)); // Titanic
-        list3.put(1717, new MovieRating(1717, 5.0)); // Scream 2
-        //this.movieNightUserRatings.put("Karvinen", list3);
-        //this.movieNightUserGenres.put("Karvinen", "Drama");
+        HashMap<Integer, Double> list3 = new HashMap<>();
+        list3.put(1, 2.5); // Toy Story
+        list3.put(19, 3.0); // Ace Venture
+        list3.put(189713, 3.5); // BlacKkKlansman
+        list3.put(32, 5.0); // 12 Monkeys
+        list3.put(104, 5.0); // Happy Gilmore
+        list3.put(1721, 4.5); // Titanic
+        list3.put(1717, 5.0); // Scream 2
 
         this.movieNightUsers.put("Karvinen", new MovieNightUser("Karvinen", list3, "Drama"));
     }
@@ -109,23 +94,23 @@ public class DataController {
 
                 // let's add the rating to movieRatings
                 if (this.movieRatings.containsKey(itemId)) {
-                    HashMap<Integer, PersonRating> persons = this.movieRatings.get(itemId);
-                    persons.put(personId, new PersonRating(personId, rating));
+                    HashMap<Integer, Double> persons = this.movieRatings.get(itemId);
+                    persons.put(personId, rating);
                     this.movieRatings.put(itemId, persons);
                 } else {
-                    HashMap<Integer, PersonRating> persons = new HashMap<>();
-                    persons.put(personId, new PersonRating(personId, rating));
+                    HashMap<Integer, Double> persons = new HashMap<>();
+                    persons.put(personId, rating);
                     this.movieRatings.put(itemId, persons);
                 }
 
                 // let's link the movie to the user (userRatings)
                 if (this.userRatings.containsKey(personId)) {
-                    HashMap<Integer, MovieRating> movies = this.userRatings.get(personId);
-                    movies.put(itemId, new MovieRating(itemId, rating));
+                    HashMap<Integer, Double> movies = this.userRatings.get(personId);
+                    movies.put(itemId, rating);
                     this.userRatings.put(personId, movies);
                 } else {
-                    HashMap<Integer, MovieRating> movies = new HashMap<>();
-                    movies.put(itemId, new MovieRating(itemId, rating));
+                    HashMap<Integer, Double> movies = new HashMap<>();
+                    movies.put(itemId, rating);
                     this.userRatings.put(personId, movies);
                 }
             }
@@ -173,8 +158,8 @@ public class DataController {
 
         // let's add all movies the user 'name' has rated to the set 's'
         // for (MovieRating m : this.movieNightUserRatings.get(name)) {
-        for (MovieRating m : this.movieNightUsers.get(name).getMovieRatings().values()) {
-            s.add(m.getMovieId());
+        for (Integer i : this.movieNightUsers.get(name).getMovieRatings().keySet()) {
+            s.add(i);
         }
 
         // let's check which users in the data set have rated the same movies
@@ -183,8 +168,8 @@ public class DataController {
             HashSet<Integer> s2 = new HashSet<>();
 
             // let's add all movies the user(Id) 'i' has rated to the set 's2'
-            for (MovieRating m2 : this.userRatings.get(i).values()) {
-                s2.add(m2.getMovieId());
+            for (Integer i2 : this.userRatings.get(i).keySet()) {
+                s2.add(i2);
             }
 
             // s2.retainAll(s) removes from set 's2' all the items that are not included in
@@ -196,6 +181,8 @@ public class DataController {
             }
         }   
 
+        // for each similar user we calculate the similarity value and
+        // these are saved to MovieNightUser in a PriorityQueue
         PriorityQueue<UserSimilarity> pq = new PriorityQueue<>();
         for (int i : similarUsers.keySet()) {
             UserSimilarity u = calculatePearson(name, i, similarUsers.get(i));
@@ -203,6 +190,7 @@ public class DataController {
         }
         this.movieNightUsers.get(name).setUserSimilarity(pq);
 
+        // testing
         while(!pq.isEmpty()) { 
             System.out.println(pq.poll()); 
         } 
@@ -217,35 +205,35 @@ public class DataController {
     public UserSimilarity calculatePearson(String name, Integer userId, HashSet<Integer> movies) {
 
         int numberOfRatings1 = 0;
-        int sum1 = 0;
-        for (MovieRating r1 : this.movieNightUsers.get(name).getMovieRatings().values()) {
+        double sum1 = 0.0;
+        for (Double r1 : this.movieNightUsers.get(name).getMovieRatings().values()) {
             numberOfRatings1 ++;
-            sum1 += r1.getRating();
+            sum1 += r1;
             }
-        double average1 = new Double(sum1) / numberOfRatings1;
+        double average1 = sum1 / numberOfRatings1;
 
         int numberOfRatings2 = 0;
-        int sum2 = 0;
-        for (MovieRating r2 : userRatings.get(userId).values()) {
+        double sum2 = 0.0;
+        for (Double r2 : userRatings.get(userId).values()) {
             numberOfRatings2 ++;
-            sum2 += r2.getRating();
+            sum2 += r2;
             }
-        double average2 = new Double(sum2) / numberOfRatings2; 
+        double average2 = sum2 / numberOfRatings2; 
 
         double sumPearson_1 = 0;
         double sumPearson_a = 0;
         double sumPearson_b = 0;
         for (int i : movies) {
-            sumPearson_1 += (this.movieNightUsers.get(name).getMovieRatings().get(i).getRating() - average1) * (this.userRatings.get(userId).get(i).getRating() - average2);
-            sumPearson_a += Math.pow((this.movieNightUsers.get(name).getMovieRatings().get(i).getRating() - average1), 2) ;
-            sumPearson_b += Math.pow((this.userRatings.get(userId).get(i).getRating() - average2), 2);
+            sumPearson_1 += (this.movieNightUsers.get(name).getMovieRatings().get(i) - average1) * (this.userRatings.get(userId).get(i) - average2);
+            sumPearson_a += Math.pow((this.movieNightUsers.get(name).getMovieRatings().get(i) - average1), 2) ;
+            sumPearson_b += Math.pow((this.userRatings.get(userId).get(i) - average2), 2);
         }
         double sim = sumPearson_1 / ( (Math.pow(sumPearson_a, 0.5) * Math.pow(sumPearson_b, 0.5)) ); 
         
         return new UserSimilarity(userId, sim);
     }
 
-    public HashMap<Integer, HashMap<Integer, PersonRating>> getMovieRatings() {
+    public HashMap<Integer, HashMap<Integer, Double>> getMovieRatings() {
         return this.movieRatings;
     }
 
@@ -253,15 +241,11 @@ public class DataController {
         return this.movies;
     }
 
-    public HashMap<Integer, HashMap<Integer, MovieRating>> getUserRatings() {
+    public HashMap<Integer, HashMap<Integer, Double>> getUserRatings() {
         return this.userRatings;
     }
 
     public HashMap<String, MovieNightUser> getMovieNightUsers() {
         return this.movieNightUsers;
     }
-
-    //public HashMap<String, ArrayList<MovieRating>> getMovieNightUserRatings() {
-    //    return this.movieNightUserRatings;
-    //}
 }
