@@ -1,5 +1,7 @@
 package classes;
 
+// Each PersonRating includes a person id (= user id in the data set)
+// and a rating
 public class PersonRating {
     private int personId;
     private double rating;
@@ -25,6 +27,7 @@ public class PersonRating {
         this.personId = p;
     }
 
+    @Override
     public String toString() {
         return "User " + this.personId + " gave a rating of " + this.rating;
     }

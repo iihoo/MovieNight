@@ -2,6 +2,7 @@ package classes;
 
 import java.util.ArrayList;
 
+// Each movie has a title and a list of genres
 public class Movie {
     private String title;
     private ArrayList<String> genres;
@@ -27,6 +28,7 @@ public class Movie {
         this.genres = genres;
     }
 
+    @Override
     public String toString() {
         String g = "";
         for (String s : this.genres) {

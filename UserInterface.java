@@ -1,6 +1,5 @@
 import java.util.Scanner;
 import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Arrays;
 
@@ -80,7 +79,6 @@ public class UserInterface {
     }
 
     public void ratingsOfOneUser(Scanner inputReader) {
-        HashMap<Integer, ArrayList<PersonRating>> movieRatings = dataController.getMovieRatings();
         HashMap<Integer, Movie> movies = this.dataController.getMovies();
 
         System.out.println();
@@ -90,13 +88,13 @@ public class UserInterface {
         String cmd = inputReader.nextLine();
         try {
             int num = Integer.parseInt(cmd);
-            if (!movieRatings.containsKey(num)) {
+            if (!dataController.getMovieRatings().containsKey(num)) {
                 System.out.println("That movieId is not used in the database!");
             } else {
-                ArrayList<PersonRating> listOfRatings = movieRatings.get(num);
-                int numberOfRatings = listOfRatings.size();
+                int numberOfRatings = 0;
                 int sum = 0;
-                for (PersonRating r : listOfRatings) {
+                for (PersonRating r : dataController.getMovieRatings().get(num).values()) {
+                    numberOfRatings ++;
                     sum += r.getRating();
                 }
                 double avg = new Double(sum) / numberOfRatings;
@@ -105,7 +103,7 @@ public class UserInterface {
                 System.out.println("The average score is " + avg);
                 System.out.println("The ratings for movie " + movies.get(num).getTitle() + " are the following");
 
-                for (PersonRating r : listOfRatings) {
+                for (PersonRating r : dataController.getMovieRatings().get(num).values()) {
                     System.out.println(r);
                 }
             }
@@ -115,7 +113,6 @@ public class UserInterface {
     }
 
     public void ratingsOfOneMovie(Scanner inputReader) {
-        HashMap<Integer, ArrayList<MovieRating>> userRatings = dataController.getUserRatings();
 
         System.out.println();
         System.out.println("Which user are you interested in?");
@@ -124,13 +121,13 @@ public class UserInterface {
         String cmd = inputReader.nextLine();
         try {
             int num = Integer.parseInt(cmd);
-            if (!userRatings.containsKey(num)) {
+            if (!dataController.getUserRatings().containsKey(num)) {
                 System.out.println("There are no users with that id in the dataset!");
             } else {
-                ArrayList<MovieRating> listOfRatings = userRatings.get(num);
-                int numberOfRatings = listOfRatings.size();
+                int numberOfRatings = 0;
                 int sum = 0;
-                for (MovieRating r : listOfRatings) {
+                for (MovieRating r : dataController.getUserRatings().get(num).values()) {
+                    numberOfRatings ++;
                     sum += r.getRating();
                 }
                 double avg = new Double(sum) / numberOfRatings;
@@ -144,7 +141,6 @@ public class UserInterface {
     }
 
     public void listOfRaitingsOfOneUser(Scanner inputReader) {
-        HashMap<Integer, ArrayList<MovieRating>> userRatings = dataController.getUserRatings();
         HashMap<Integer, Movie> movies = this.dataController.getMovies();
 
         System.out.println();
@@ -154,12 +150,11 @@ public class UserInterface {
         String cmd = inputReader.nextLine();
         try {
             int num = Integer.parseInt(cmd);
-            if (!userRatings.containsKey(num)) {
+            if (!dataController.getUserRatings().containsKey(num)) {
                 System.out.println("There are no users with that id in the dataset!");
             } else {
-                ArrayList<MovieRating> listOfRatings = userRatings.get(num);
                 System.out.println("The ratings for the user " + num + " are the following");
-                for (MovieRating r : listOfRatings) {
+                for (MovieRating r : dataController.getUserRatings().get(num).values()) {
                     int movie = r.getMovieId();
 
                     System.out.println(movies.get(movie).getTitle() + " was rated " + r.getRating());
@@ -171,20 +166,19 @@ public class UserInterface {
     }
 
     public void ratingsOfOneMovieNightUser(Scanner inputReader) {
-        HashMap<String, ArrayList<MovieRating>> movieNightUserRatings = this.dataController.getMovieNightUserRatings();
 
         System.out.println();
         System.out.println("Which MovieNight user are you interested in?");
         System.out.print("MovieNight user (name): ");
 
         String name = inputReader.nextLine();
-        if (!movieNightUserRatings.containsKey(name)) {
+        if (!this.dataController.getMovieNightUsers().containsKey(name)) {
             System.out.println("There are no users with that name using MovieNight!");
         } else {
-            ArrayList<MovieRating> listOfRatings = movieNightUserRatings.get(name);
-            int numberOfRatings = listOfRatings.size();
+            int numberOfRatings = 0;
             int sum = 0;
-            for (MovieRating r : listOfRatings) {
+            for (MovieRating r : this.dataController.getMovieNightUsers().get(name).getMovieRatings().values()) {
+                numberOfRatings ++;
                 sum += r.getRating();
             }
             double avg = new Double(sum) / numberOfRatings;
@@ -195,7 +189,6 @@ public class UserInterface {
     }
 
     public void listOfRaitingsOfOneMovieNightUser(Scanner inputReader) {
-        HashMap<String, ArrayList<MovieRating>> movieNightUserRatings = this.dataController.getMovieNightUserRatings();
         HashMap<Integer, Movie> movies = this.dataController.getMovies();
 
         System.out.println();
@@ -203,12 +196,11 @@ public class UserInterface {
         System.out.print("MovieNight user (name): ");
         
         String name = inputReader.nextLine();
-        if (!movieNightUserRatings.containsKey(name)) {
+        if (!this.dataController.getMovieNightUsers().containsKey(name)) {
             System.out.println("There are no users with that name using MovieNight!");
         } else {
-            ArrayList<MovieRating> listOfRatings = movieNightUserRatings.get(name);
             System.out.println("The ratings for the user " + name + " are the following");
-            for (MovieRating r : listOfRatings) {
+            for (MovieRating r : this.dataController.getMovieNightUsers().get(name).getMovieRatings().values()) {
                 int movie = r.getMovieId();
                 System.out.println(movies.get(movie).getTitle() + " was rated " + r.getRating());
             }
@@ -216,14 +208,13 @@ public class UserInterface {
     }
 
     public void similarUsers(Scanner inputReader) {
-        HashMap<String, ArrayList<MovieRating>> movieNightUserRatings = this.dataController.getMovieNightUserRatings();
 
         System.out.println();
         System.out.println("Which MovieNight user are you interested in?");
         System.out.print("MovieNight user (name): ");
         
         String name = inputReader.nextLine();
-        if (!movieNightUserRatings.containsKey(name)) {
+        if (!this.dataController.getMovieNightUsers().containsKey(name)) {
             System.out.println("There are no users with that name using MovieNight!");
         } else {
             HashMap<Integer, HashSet<Integer>> similarUsers = this.dataController.getSimilarUsers(name);
