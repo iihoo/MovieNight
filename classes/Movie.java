@@ -28,12 +28,17 @@ public class Movie {
         this.genres = genres;
     }
 
+    //@Override
+    //public String toString() {
+    //    String g = "";
+    //    for (String s : this.genres) {
+    //        g += s + " ";
+    //    }
+    //    return this.title + " (contains the following genres: " + g + ")";
+    //}
+
     @Override
     public String toString() {
-        String g = "";
-        for (String s : this.genres) {
-            g += s + " ";
-        }
-        return this.title + " contains the following genres: " + g;
+        return this.title;
     }
 }

@@ -9,6 +9,7 @@ import java.util.PriorityQueue;
 import classes.Movie;
 import classes.MovieNightUser;
 import classes.UserSimilarity;
+import classes.MovieRating;
 
 public class DataController {
 
@@ -20,13 +21,29 @@ public class DataController {
     // movieId is the 'outer' HashMap key.
     // for the 'inner' HashMap the user id is the key
     private HashMap<Integer, HashMap<Integer, Double>> movieRatings;
-    //private HashMap<Integer, HashMap<Integer, PersonRating>> movieRatings;
+    // private HashMap<Integer, HashMap<Integer, PersonRating>> movieRatings;
 
     // movies and their titles (movieId is the HashMap key)
     private HashMap<Integer, Movie> movies;
 
     // users and which movies they have rated (userId is the HashMap key)
     private HashMap<Integer, HashMap<Integer, Double>> userRatings;
+
+    public HashMap<Integer, HashMap<Integer, Double>> getMovieRatings() {
+        return this.movieRatings;
+    }
+
+    public HashMap<Integer, Movie> getMovies() {
+        return this.movies;
+    }
+
+    public HashMap<Integer, HashMap<Integer, Double>> getUserRatings() {
+        return this.userRatings;
+    }
+
+    public HashMap<String, MovieNightUser> getMovieNightUsers() {
+        return this.movieNightUsers;
+    }
 
     public DataController() {
         this.movieRatings = new HashMap<>();
@@ -69,8 +86,8 @@ public class DataController {
         list3.put(189713, 3.5); // BlacKkKlansman
         list3.put(32, 5.0); // 12 Monkeys
         list3.put(104, 5.0); // Happy Gilmore
-        list3.put(1721, 4.5); // Titanic
-        list3.put(1717, 5.0); // Scream 2
+        list3.put(1721, 0.5); // Titanic
+        list3.put(1717, 1.0); // Scream 2
 
         this.movieNightUsers.put("Karvinen", new MovieNightUser("Karvinen", list3, "Drama"));
     }
@@ -154,6 +171,7 @@ public class DataController {
 
     public HashMap<Integer, HashSet<Integer>> getSimilarUsers(String name) {
         HashMap<Integer, HashSet<Integer>> similarUsers = new HashMap<>();
+        HashSet<Integer> moviesNotSeen = new HashSet<>();
         HashSet<Integer> s = new HashSet<>();
 
         // let's add all movies the user 'name' has rated to the set 's'
@@ -165,21 +183,45 @@ public class DataController {
         // let's check which users in the data set have rated the same movies
         // NOTE at least 4 movies have to be the same
         for (Integer i : this.userRatings.keySet()) {
-            HashSet<Integer> s2 = new HashSet<>();
+            // 'commonMovies' is a set of movies that are common with the two users
+            // 'uncommonMovies' is a set of movies that are not seen by the MovieNightUser
+            HashSet<Integer> commonMovies = new HashSet<>();
+            HashSet<Integer> uncommonMovies = new HashSet<>();
 
-            // let's add all movies the user(Id) 'i' has rated to the set 's2'
+            // let's add all movies the user(Id) 'i' has rated to the set 'commonMovies' and
+            // 'uncommonMovies'
             for (Integer i2 : this.userRatings.get(i).keySet()) {
-                s2.add(i2);
+                commonMovies.add(i2);
+                uncommonMovies.add(i2);
             }
 
-            // s2.retainAll(s) removes from set 's2' all the items that are not included in
+            // commonMovies.retainAll(s) removes from set 'commonMovies' all the items that
+            // are not included in
             // set 's'
-            // so after that s2 only has common items between 's2' and 's'
-            s2.retainAll(s);
-            if (s2.size() > 3) {
-                similarUsers.put(i, s2);
+            // so after that 'commonMovies' only has common items between 'commonMovies' and
+            // 's'
+            // uncommonMovies.removeAll(s) removes from set 'uncommonMovies' all the items
+            // that are included in set
+            // 's'
+            // so after that 'uncommonMovies' only has items that are not seen by the
+            // MovieNightUser (this
+            // is only
+            // done with users that have at least 4 movies in common with the
+            // MovieNightUser)
+            commonMovies.retainAll(s);
+            if (commonMovies.size() > 3) {
+                similarUsers.put(i, commonMovies);
+                uncommonMovies.removeAll(s);
+                // System.out.println("common items " + commonMovies);
+                // System.out.println("uncommon items " + uncommonMovies);
+                moviesNotSeen.addAll(uncommonMovies);
             }
-        }   
+
+        }
+
+        // finally we add all the movies not seen by the MovieNightUser to his/her
+        // profile
+        this.movieNightUsers.get(name).setMoviesNotSeen(moviesNotSeen);
 
         // for each similar user we calculate the similarity value and
         // these are saved to MovieNightUser in a PriorityQueue
@@ -188,17 +230,24 @@ public class DataController {
             UserSimilarity u = calculatePearson(name, i, similarUsers.get(i));
             pq.add(u);
         }
-        this.movieNightUsers.get(name).setUserSimilarity(pq);
 
         // testing
-        while(!pq.isEmpty()) { 
-            System.out.println(pq.poll()); 
-        } 
+        // System.out.println("ennen lisäystä jonon koko on " +
+        // this.movieNightUsers.get(name).getUserSimilarity().size());
+        this.movieNightUsers.get(name).setUserSimilarity(pq);
+        // System.out.println("lisäyksen jälkeen jonon koko on " +
+        // this.movieNightUsers.get(name).getUserSimilarity().size());
+
+        // testing
+        // System.out.println("testausta:");
+        // while (!pq.isEmpty()) {
+        // System.out.println(pq.poll());
+        // }
 
         // A HashMap is returned with userId-HashSet key-value pairs
         // the HashSet contains the common items between userId and MovieNight user
         // 'name'
-        // HashSet is the set 's2' above
+        // HashSet is the set 'commonMovies' above
         return similarUsers;
     }
 
@@ -207,45 +256,137 @@ public class DataController {
         int numberOfRatings1 = 0;
         double sum1 = 0.0;
         for (Double r1 : this.movieNightUsers.get(name).getMovieRatings().values()) {
-            numberOfRatings1 ++;
+            numberOfRatings1++;
             sum1 += r1;
-            }
+        }
         double average1 = sum1 / numberOfRatings1;
 
         int numberOfRatings2 = 0;
         double sum2 = 0.0;
         for (Double r2 : userRatings.get(userId).values()) {
-            numberOfRatings2 ++;
+            numberOfRatings2++;
             sum2 += r2;
-            }
-        double average2 = sum2 / numberOfRatings2; 
+        }
+        double average2 = sum2 / numberOfRatings2;
 
         double sumPearson_1 = 0;
         double sumPearson_a = 0;
         double sumPearson_b = 0;
         for (int i : movies) {
-            sumPearson_1 += (this.movieNightUsers.get(name).getMovieRatings().get(i) - average1) * (this.userRatings.get(userId).get(i) - average2);
-            sumPearson_a += Math.pow((this.movieNightUsers.get(name).getMovieRatings().get(i) - average1), 2) ;
+            sumPearson_1 += (this.movieNightUsers.get(name).getMovieRatings().get(i) - average1)
+                    * (this.userRatings.get(userId).get(i) - average2);
+            sumPearson_a += Math.pow((this.movieNightUsers.get(name).getMovieRatings().get(i) - average1), 2);
             sumPearson_b += Math.pow((this.userRatings.get(userId).get(i) - average2), 2);
         }
-        double sim = sumPearson_1 / ( (Math.pow(sumPearson_a, 0.5) * Math.pow(sumPearson_b, 0.5)) ); 
-        
+        double sim = sumPearson_1 / ((Math.pow(sumPearson_a, 0.5) * Math.pow(sumPearson_b, 0.5)));
+
         return new UserSimilarity(userId, sim);
     }
 
-    public HashMap<Integer, HashMap<Integer, Double>> getMovieRatings() {
-        return this.movieRatings;
+    public void calculatePredictions(String movieNightUserName) {
+        // int top3 = 0;
+        // int top2 = 0;
+        // int top1 = 0;
+        MovieNightUser movieNightUser = this.movieNightUsers.get(movieNightUserName);
+        HashSet<Integer> moviesNotSeen = movieNightUser.getMoviesNotSeen();
+        PriorityQueue<UserSimilarity> similarUsers = movieNightUser.getUserSimilarity();
+        PriorityQueue<MovieRating> recommendedMovies = new PriorityQueue<>();
+
+        // System.out.println("testausa: ");
+        // System.out.println("moviesNotSeen " + moviesNotSeen.size());
+        // System.out.println("similarUsers " + similarUsers.size());
+
+        // System.out.println("testausta jono koko on:" + similarUsers.size());
+        // while (!similarUsers.isEmpty()) {
+        // System.out.println(similarUsers.poll());
+        // }
+
+        // first we calculate the average rating given by the MovieNightUser
+        int numberOfRatings = 0;
+        double sum = 0.0;
+        for (Double r : movieNightUser.getMovieRatings().values()) {
+            numberOfRatings++;
+            sum += r;
+        }
+        double avg = sum / numberOfRatings;
+        System.out.println("average of " + movieNightUserName + "is " + avg);
+
+        for (Integer movieId : moviesNotSeen) {
+            PriorityQueue<UserSimilarity> copyOfSimilarUsers = new PriorityQueue<>(similarUsers);
+            HashSet<UserSimilarity> topThreeSimilarUsers = new HashSet<>();
+            // while (topThreeSimilarUsers.size() < 10) {
+            // while loop goest through the priority queue until empty OR as long
+            // as the similarity value is positive
+            while (true) {
+                UserSimilarity u = copyOfSimilarUsers.poll();
+                if (u == null) {
+                    break;
+                } else if (u.getPearson() < 0) {
+                    break;
+                } else {
+                    if (this.movieRatings.get(movieId).containsKey(u.getUserId())) {
+                        topThreeSimilarUsers.add(u);
+                    }
+                }
+            }
+
+            // testausta
+            // nähdään kuinka monta erikokoista ryhmää löytyy
+            // if (topThreeSimilarUsers.size() == 1) {
+            // top1 ++;
+            // } else if (topThreeSimilarUsers.size() == 2) {
+            // top2++;
+            // } else if (topThreeSimilarUsers.size() == 3) {
+            // top3 ++;
+            // }
+            // System.out.println("3:n ryhmiä " + top3);
+            // System.out.println("2:n ryhmiä " + top2);
+            // System.out.println("1:n ryhmiä " + top1);
+
+            // lasketaan arvosana niille elokuville, joille löytyy vähintään 10 samanlaista käyttäjää
+            // MovieNightUser-käyttäjän kanssa
+            if (topThreeSimilarUsers.size() > 9) {
+                double dividend = 0.0;
+                double denominator = 0.0;
+                for (UserSimilarity topUser : topThreeSimilarUsers) {
+                    Double similarityValue = topUser.getPearson();
+                    Double ratingValue = this.movieRatings.get(movieId).get(topUser.getUserId());
+
+                    int numberOfUserRatings = 0;
+                    double sumOfRatings = 0.0;
+                    for (Double r : this.userRatings.get(topUser.getUserId()).values()) {
+                        numberOfUserRatings++;
+                        sumOfRatings += r;
+                    }
+                    double averagePrediction = sumOfRatings / numberOfUserRatings;
+                    dividend += similarityValue * (ratingValue - averagePrediction);
+                    denominator += similarityValue;
+                }
+                // System.out.println();
+                // System.out.println("new set, movie: " + i);
+                // System.out.println("rating: " + ratingValue);
+                // System.out.println("average: " + averagePrediction);
+                // System.out.println("similarity: " + similarityValue);
+                double prediction = avg + (dividend / denominator);
+                if (prediction - 5 > 0) {
+                    prediction = 5;
+                }
+                //System.out.println("prediction for movie " + movieId + " is " + prediction);
+                recommendedMovies.add(new MovieRating(movieId, prediction));
+            }
+
+        }
+
+        System.out.println("recommended movies: " + recommendedMovies.size());
+        int n = 0;
+        while (n < 25) {
+            if (recommendedMovies.isEmpty()) {
+                break;
+            }
+            MovieRating m = recommendedMovies.poll();
+            System.out.println("Prediction: " + m.getRating() + " for " + m.getMovieId() + " " + this.movies.get(m.getMovieId()).getGenres());
+            n++;
+        }
     }
 
-    public HashMap<Integer, Movie> getMovies() {
-        return this.movies;
-    }
-
-    public HashMap<Integer, HashMap<Integer, Double>> getUserRatings() {
-        return this.userRatings;
-    }
-
-    public HashMap<String, MovieNightUser> getMovieNightUsers() {
-        return this.movieNightUsers;
-    }
 }
