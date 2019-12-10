@@ -1,7 +1,7 @@
 
 public class MovieNight {
     public static void main(String[] args) {
-        UserInterface userinterface = new UserInterface();
+        MovieNightUI userinterface = new MovieNightUI();
         userinterface.start();
     }
 }

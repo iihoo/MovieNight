@@ -1,35 +1,41 @@
-import java.util.Scanner;
-import java.io.File;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.PriorityQueue;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Comparator;
+package components;
 
 import classes.Movie;
 import classes.MovieNightUser;
 import classes.UserSimilarity;
 import classes.MovieRating;
 
-public class DataController {
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.PriorityQueue;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Comparator;
+
+public class MainController {
+    private DataController dataController;
 
     // MovieNightUsers (name is the HashMap key)
     private HashMap<String, MovieNightUser> movieNightUsers;
 
+    /* 11111111
     // movies and their ratings in the dataset (movieId is the HashMap key)
     // for each movie in the dataset the rating is saved
     // movieId is the 'outer' HashMap key.
     // for the 'inner' HashMap the user id is the key
     private HashMap<Integer, HashMap<Integer, Double>> movieRatings;
+    */
 
+    /* 1111111
     // movies and their titles (movieId is the HashMap key)
     private HashMap<Integer, Movie> movies;
+    */
 
+    /*
     // users and which movies they have rated (userId is the HashMap key)
     private HashMap<Integer, HashMap<Integer, Double>> userRatings;
+    */
 
     // here the individual recommendation lists are saved
     private HashMap<String, PriorityQueue<MovieRating>> userRecommendationLists;
@@ -46,40 +52,20 @@ public class DataController {
     private double genreCoefficient;
     private int listSize;
 
-    public DataController() {
-        this.movieRatings = new HashMap<>();
-        this.movies = new HashMap<>();
-        this.userRatings = new HashMap<>();
+    public MainController() {
+        this.dataController = new DataController();
         this.movieNightUsers = new HashMap<>();
         this.userRecommendationLists = new HashMap<>();
         this.commonMovies = 4;
         this.minimumNumberOfSimilarUsers = 10;
         this.genreCoefficient = 0.5;
         this.listSize = 20;
-    }
 
-    public HashMap<Integer, HashMap<Integer, Double>> getMovieRatings() {
-        return this.movieRatings;
-    }
+        // let's load the ratings
+        this.dataController.loadRatingsData();
 
-    public void setMovieRatings(HashMap<Integer, HashMap<Integer, Double>> ratings) {
-        this.movieRatings = ratings;
-    }
-
-    public HashMap<Integer, Movie> getMovies() {
-        return this.movies;
-    }
-
-    public void setMovies(HashMap<Integer, Movie> movies) {
-        this.movies = movies;
-    }
-
-    public HashMap<Integer, HashMap<Integer, Double>> getUserRatings() {
-        return this.userRatings;
-    }
-
-    public void setUserRatings(HashMap<Integer, HashMap<Integer, Double>> ratings) {
-        this.userRatings = ratings;
+        // let's load movie data
+        this.dataController.loadMovieData();
     }
 
     public HashMap<String, MovieNightUser> getMovieNightUsers() {
@@ -130,86 +116,16 @@ public class DataController {
         this.listSize = s;
     }
 
-    // this function loads the ratings (userId + movieId + rating)
-    public void loadRatingsData() {
-        // let's create a Scanner to load the data from File
-        // the data includes movie ratings in following way
-        // 'userid' 'item' 'id' 'rating' 'time stamp'
-        // (we are not interested in the time stamp)
-        try (Scanner dataReader = new Scanner(new File("data/ratings.csv"))) {
-            // we will ignore the first one as it contains the "column names"
-            dataReader.nextLine();
-
-            // let's read the file line by line
-            while (dataReader.hasNextLine()) {
-                String[] parts = dataReader.nextLine().split(",");
-
-                int personId = Integer.parseInt(parts[0]);
-                int itemId = Integer.parseInt(parts[1]);
-                double rating = Double.parseDouble(parts[2]);
-
-                // let's add the rating to movieRatings
-                if (this.movieRatings.containsKey(itemId)) {
-                    HashMap<Integer, Double> persons = this.movieRatings.get(itemId);
-                    persons.put(personId, rating);
-                    this.movieRatings.put(itemId, persons);
-                } else {
-                    HashMap<Integer, Double> persons = new HashMap<>();
-                    persons.put(personId, rating);
-                    this.movieRatings.put(itemId, persons);
-                }
-
-                // let's link the movie to the user (userRatings)
-                if (this.userRatings.containsKey(personId)) {
-                    HashMap<Integer, Double> movies = this.userRatings.get(personId);
-                    movies.put(itemId, rating);
-                    this.userRatings.put(personId, movies);
-                } else {
-                    HashMap<Integer, Double> movies = new HashMap<>();
-                    movies.put(itemId, rating);
-                    this.userRatings.put(personId, movies);
-                }
-            }
-            System.out.println();
-            System.out.println("File read ('ratings.csv').");
-        } catch (Exception e) {
-            System.out.println("ERROR: " + e.getMessage());
-        }
+    public HashMap<Integer, HashMap<Integer, Double>> getMovieRatings() {
+        return this.dataController.getMovieRatings();
     }
 
-    // let's load movie data (movieId + title)
-    public void loadMovieData() {
-        // let's create a Scanner to load the data from File
-        // the data includes movie info in following way (whitespace/tab separated)
-        // 'movie-id' 'movie title' 'genres'
-        // (at the moment we are only interested in the movie id, movie title and movie
-        // genres)
-        try (Scanner dataReader = new Scanner(new File("data/movies.csv"))) {
-            // we will ignore the first one as it contains the column names
-            dataReader.nextLine();
-
-            // let's read the file line by line
-            while (dataReader.hasNextLine()) {
-                String[] parts = dataReader.nextLine().split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
-
-                int movieId = Integer.parseInt(parts[0]);
-                String title = parts[1];
-
-                String[] g = parts[2].split("\\|");
-                ArrayList<String> genres = new ArrayList<>(Arrays.asList(g));
-
-                Movie movie = new Movie(title, genres);
-
-                this.movies.put(movieId, movie);
-            }
-            System.out.println();
-            System.out.println("File read ('movies.csv').");
-        } catch (Exception e) {
-            System.out.println("ERROR: " + e.getMessage());
-        }
+    public HashMap<Integer, Movie> getMovies() {
+        return this.dataController.getMovies();
     }
 
     public void calculateSimilarUsers(String name) {
+        HashMap<Integer, HashMap<Integer, Double>> userRatings = this.dataController.getUserRatings();
         HashMap<Integer, HashSet<Integer>> similarUsers = new HashMap<>();
         HashSet<Integer> moviesNotSeen = new HashSet<>();
         HashSet<Integer> s = new HashSet<>();
@@ -222,7 +138,7 @@ public class DataController {
 
         // let's check which users in the data set have rated the same movies
         // NOTE at least 4 movies have to be the same
-        for (Integer i : this.userRatings.keySet()) {
+        for (Integer i : userRatings.keySet()) {
             // 'commonMovies' is a set of movies that are common with the two users
             // 'uncommonMovies' is a set of movies that are not seen by the MovieNightUser
             HashSet<Integer> commonMovies = new HashSet<>();
@@ -230,7 +146,7 @@ public class DataController {
 
             // let's add all movies the user(Id) 'i' has rated to the set 'commonMovies' and
             // 'uncommonMovies'
-            for (Integer i2 : this.userRatings.get(i).keySet()) {
+            for (Integer i2 : userRatings.get(i).keySet()) {
                 commonMovies.add(i2);
                 uncommonMovies.add(i2);
             }
@@ -268,6 +184,7 @@ public class DataController {
     }
 
     public UserSimilarity calculatePearson(String name, Integer userId, HashSet<Integer> movies) {
+        HashMap<Integer, HashMap<Integer, Double>> userRatings = this.dataController.getUserRatings();
 
         int numberOfRatings1 = 0;
         double sum1 = 0.0;
@@ -290,9 +207,9 @@ public class DataController {
         double sumPearson_b = 0;
         for (int i : movies) {
             sumPearson_1 += (this.movieNightUsers.get(name).getMovieRatings().get(i) - average1)
-                    * (this.userRatings.get(userId).get(i) - average2);
+                    * (userRatings.get(userId).get(i) - average2);
             sumPearson_a += Math.pow((this.movieNightUsers.get(name).getMovieRatings().get(i) - average1), 2);
-            sumPearson_b += Math.pow((this.userRatings.get(userId).get(i) - average2), 2);
+            sumPearson_b += Math.pow((userRatings.get(userId).get(i) - average2), 2);
         }
         double sim = sumPearson_1 / ((Math.pow(sumPearson_a, 0.5) * Math.pow(sumPearson_b, 0.5)));
 
@@ -300,6 +217,8 @@ public class DataController {
     }
 
     public void calculatePredictions(String movieNightUserName) {
+        HashMap<Integer, HashMap<Integer, Double>> userRatings = this.dataController.getUserRatings();
+        HashMap<Integer, HashMap<Integer, Double>> movieRatings = this.dataController.getMovieRatings();
         MovieNightUser movieNightUser = this.movieNightUsers.get(movieNightUserName);
         HashSet<Integer> moviesNotSeen = movieNightUser.getMoviesNotSeen();
         PriorityQueue<UserSimilarity> similarUsers = movieNightUser.getUserSimilarity();
@@ -313,7 +232,7 @@ public class DataController {
             sum += r;
         }
         double avg = sum / numberOfRatings;
-        // System.out.println("average of " + movieNightUserName + " is: " + avg);
+        //System.out.println("average of " + movieNightUserName + " is: " + avg);
 
         for (Integer movieId : moviesNotSeen) {
             PriorityQueue<UserSimilarity> copyOfSimilarUsers = new PriorityQueue<>(similarUsers);
@@ -327,7 +246,7 @@ public class DataController {
                 } else if (u.getPearson() < 0) {
                     break;
                 } else {
-                    if (this.movieRatings.get(movieId).containsKey(u.getUserId())) {
+                    if (movieRatings.get(movieId).containsKey(u.getUserId())) {
                         topThreeSimilarUsers.add(u);
                     }
                 }
@@ -341,11 +260,11 @@ public class DataController {
                 double denominator = 0.0;
                 for (UserSimilarity topUser : topThreeSimilarUsers) {
                     Double similarityValue = topUser.getPearson();
-                    Double ratingValue = this.movieRatings.get(movieId).get(topUser.getUserId());
+                    Double ratingValue = movieRatings.get(movieId).get(topUser.getUserId());
 
                     int numberOfUserRatings = 0;
                     double sumOfRatings = 0.0;
-                    for (Double r : this.userRatings.get(topUser.getUserId()).values()) {
+                    for (Double r : userRatings.get(topUser.getUserId()).values()) {
                         numberOfUserRatings++;
                         sumOfRatings += r;
                     }
@@ -362,24 +281,25 @@ public class DataController {
 
         }
 
-        // Here we can list the predictions
-        // System.out.println("recommended movies: " + recommendedMovies.size());
-        // int n = 0;
-        // while (n < 25) {
-        // if (recommendedMovies.isEmpty()) {
-        // break;
-        // }
-        // MovieRating m = recommendedMovies.poll();
-        // System.out.println("Prediction: " + m.getRating() + " for " + m.getMovieId()
-        // + " " + this.movies.get(m.getMovieId()).getGenres());
-        // n++;
-        // }
+         //Here we can list the predictions
+         //System.out.println("recommended movies: " + recommendedMovies.size());
+         //int n = 0;
+         //while (n < 25) {
+         //if (recommendedMovies.isEmpty()) {
+         //break;
+         //}
+         //MovieRating m = recommendedMovies.poll();
+         //System.out.println("Prediction: " + m.getRating() + " for " + m.getMovieId()
+         //+ " " + this.dataController.getMovies().get(m.getMovieId()).getGenres());
+         //n++;
+         //}
 
         // let's add the list to the collection of lists
         this.userRecommendationLists.put(movieNightUserName, recommendedMovies);
     }
 
     public void calculateRecommendationLists() {
+        HashMap<Integer, Movie> movies = this.dataController.getMovies();
         
         System.out.println("\n*** *** *** Calculating recommendation lists.... *** *** ***");
 
@@ -403,7 +323,7 @@ public class DataController {
 
         for (String name : userRecommendationLists.keySet()) {
             PriorityQueue<MovieRating> x = this.userRecommendationLists.get(name);
-            // System.out.println("recommended movies for " + name + ": " + x.size());
+            //System.out.println("recommended movies for " + name + ": " + x.size());
             if (x.size() < amountOfMovies) {
                 amountOfMovies = x.size();
             }
@@ -433,7 +353,7 @@ public class DataController {
 
         for (int movieId : groupRecommendationListWithGenres.keySet()) {
             double extraPoints = 0;
-            ArrayList<String> movieGenres = this.movies.get(movieId).getGenres();
+            ArrayList<String> movieGenres = movies.get(movieId).getGenres();
             for (String s : movieGenres) {
                 if (genres.contains(s)) {
                     extraPoints += this.genreCoefficient * amountOfMovies;
@@ -486,10 +406,11 @@ public class DataController {
     }
 
     public void printList(HashMap<Integer, Integer> list) {
+        HashMap<Integer, Movie> movies = this.dataController.getMovies();
         int n = 1;
         for (int x : list.keySet()) {
-            System.out.println("[" + n + "] " + list.get(x) + " points for movie "
-                    + x + " " + this.movies.get(x).getGenres());
+            System.out.println("[" + n + "] " + list.get(x) + " points for "
+                    + movies.get(x) + " " + movies.get(x).getGenres());
             if (n == this.listSize) {
                 break;
             }

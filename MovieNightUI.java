@@ -2,22 +2,19 @@ import java.util.Scanner;
 import java.util.HashMap;
 import java.util.Locale;
 
+import components.MainController;
+
 import classes.Movie;
 import classes.MovieNightUser;
 
-public class UserInterface {
-    private DataController dataController;
+public class MovieNightUI {
+    private MainController controller;
 
-    public UserInterface() {
-        this.dataController = new DataController();
+    public MovieNightUI() {
     }
 
     public void start() {
-        // let's load the ratings
-        this.dataController.loadRatingsData();
-
-        // let's load movie data
-        this.dataController.loadMovieData();
+        this.controller = new MainController();
 
         // let's add a couple of test users for the system
         HashMap<String, MovieNightUser> movieNightUsers = new HashMap<>();
@@ -62,7 +59,7 @@ public class UserInterface {
         list4.put(7439, 2.5); // Punisher
         movieNightUsers.put("Aku", new MovieNightUser("Lupu", list4, "Crime"));
 
-        this.dataController.setMovieNightUsers(movieNightUsers);
+        this.controller.setMovieNightUsers(movieNightUsers);
 
         // let's start the program
         Scanner inputReader = new Scanner(System.in);
@@ -97,7 +94,7 @@ public class UserInterface {
 
     // Show genereal info about the movie data
     public void generalInfo(Scanner inputReader) {
-        int n = this.dataController.getMovieRatings().size();
+        int n = this.controller.getMovieRatings().size();
 
         System.out.println("\n *** The app contains ratings for " + n + " movies. \n");
         System.out.println("Do you want to list all the movies? (type 'yes' to continue)");
@@ -105,17 +102,17 @@ public class UserInterface {
         String command = inputReader.nextLine();
 
         if (command.equals("yes")) {
-            for (int movieId : this.dataController.getMovies().keySet()) {
-                System.out.println("MovieId " + movieId + ": " + this.dataController.getMovies().get(movieId)
-                        + " --- GENRES:" + this.dataController.getMovies().get(movieId).getGenres());
+            for (int movieId : this.controller.getMovies().keySet()) {
+                System.out.println("MovieId " + movieId + ": " + this.controller.getMovies().get(movieId)
+                        + " --- GENRES:" + this.controller.getMovies().get(movieId).getGenres());
             }
         }
     }
 
     // Show more specific info about one particular movie
     public void ratingsOfOneMovie(Scanner inputReader) {
-        HashMap<Integer, Movie> movies = this.dataController.getMovies();
-        HashMap<Integer, HashMap<Integer, Double>> movieRatings = this.dataController.getMovieRatings();
+        HashMap<Integer, Movie> movies = this.controller.getMovies();
+        HashMap<Integer, HashMap<Integer, Double>> movieRatings = this.controller.getMovieRatings();
 
         System.out.println("\nWhich movie are you interested in?");
         System.out.print("Movie (id): ");
@@ -161,17 +158,17 @@ public class UserInterface {
 
         if (command.equals("yes")) {
             // initialize default coefficients
-            this.dataController.setCommonMovies(4);
-            this.dataController.setMinimumNumberOfSimilarUsers(10);
-            this.dataController.setGenreCoefficient(0.5);
-            this.dataController.setListSize(20);
+            this.controller.setCommonMovies(4);
+            this.controller.setMinimumNumberOfSimilarUsers(10);
+            this.controller.setGenreCoefficient(0.5);
+            this.controller.setListSize(20);
             // ... and calculate recommendation lists
-            this.dataController.calculateRecommendationLists();
+            this.controller.calculateRecommendationLists();
         } else if (command.equals("no")) {
             // adjust values ...
             adjustCalculationCoefficients(inputReader);
             // ... and calculate recommendation lists
-            this.dataController.calculateRecommendationLists();
+            this.controller.calculateRecommendationLists();
         } else {
             System.out.println("Unknown command. Try again. (press 'x' to abort)");
         }
@@ -207,10 +204,11 @@ public class UserInterface {
 
             int listSize = Integer.parseInt(inputReader.nextLine());
 
-            this.dataController.setCommonMovies(commonMovies);
-            this.dataController.setMinimumNumberOfSimilarUsers(minimumNumberOfSimilarUsers);
-            this.dataController.setGenreCoefficient(genreCoefficient);
-            this.dataController.setListSize(listSize);
+            // if all parameters have been successfully selected, they are saved to Controller
+            this.controller.setCommonMovies(commonMovies);
+            this.controller.setMinimumNumberOfSimilarUsers(minimumNumberOfSimilarUsers);
+            this.controller.setGenreCoefficient(genreCoefficient);
+            this.controller.setListSize(listSize);
         } catch (NumberFormatException e) {
             System.out.println("\nYou did not enter a number!");
             System.out.println("Default coefficients will be used.");
