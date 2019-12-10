@@ -1,17 +1,9 @@
 import java.util.Scanner;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.ArrayList;
 import java.util.Locale;
-import java.util.Arrays;
 
 import classes.Movie;
 import classes.MovieNightUser;
-import classes.MovieRating;
 
 public class UserInterface {
     private DataController dataController;
@@ -21,7 +13,6 @@ public class UserInterface {
     }
 
     public void start() {
-
         // let's load the ratings
         this.dataController.loadRatingsData();
 
@@ -61,23 +52,33 @@ public class UserInterface {
         list3.put(1717, 1.0); // Scream 2
         movieNightUsers.put("Lupu", new MovieNightUser("Lupu", list3, "Comedy"));
 
+        HashMap<Integer, Double> list4 = new HashMap<>();
+        list4.put(6711, 4.5); // Lost in Translation
+        list4.put(19, 2.5); // Ace Venture
+        list4.put(189713, 4.0); // BlacKkKlansman
+        list4.put(32, 3.0); // 12 Monkeys
+        list4.put(6373, 1.5); // Bruce Almighty
+        list4.put(1721, 2.0); // Titanic
+        list4.put(7439, 2.5); // Punisher
+        movieNightUsers.put("Aku", new MovieNightUser("Lupu", list4, "Crime"));
+
         this.dataController.setMovieNightUsers(movieNightUsers);
 
         // let's start the program
         Scanner inputReader = new Scanner(System.in);
         while (true) {
-            System.out.println();
-            System.out.println("-----------------------------------------------");
+
+            System.out.println("\n-----------------------------------------------");
             System.out.println("Commands: ");
             System.out.println(" x - stop the application");
             System.out.println(" 1 - show general info");
             System.out.println(" 2 - show ratings info for a specific movie");
             System.out.println(" 3 - show recommendation lists");
-            System.out.println("-----------------------------------------------");
-            System.out.println("");
-
+            System.out.println("-----------------------------------------------\n");
             System.out.print("Your command: ");
+
             String command = inputReader.nextLine();
+
             if (command.equals("x")) {
                 break;
             }
@@ -87,56 +88,62 @@ public class UserInterface {
             } else if (command.equals("2")) {
                 ratingsOfOneMovie(inputReader);
             } else if (command.equals("3")) {
-                calculateRecommendationLists();
+                calculateRecommendationLists(inputReader);
             } else {
                 System.out.println("Unknown command. Try again. (press 'x' to stop the application)");
             }
         }
     }
 
+    // Show genereal info about the movie data
     public void generalInfo(Scanner inputReader) {
         int n = this.dataController.getMovieRatings().size();
 
         System.out.println("\n *** The app contains ratings for " + n + " movies. \n");
         System.out.println("Do you want to list all the movies? (type 'yes' to continue)");
-        String cmd = inputReader.nextLine();
-        if (cmd.equals("yes")) {
-            for (Integer movieId : this.dataController.getMovies().keySet()) {
-                System.out.println("MovieId " + movieId + ": " + this.dataController.getMovies().get(movieId) + " --- GENRES:" + this.dataController.getMovies().get(movieId).getGenres());
+
+        String command = inputReader.nextLine();
+
+        if (command.equals("yes")) {
+            for (int movieId : this.dataController.getMovies().keySet()) {
+                System.out.println("MovieId " + movieId + ": " + this.dataController.getMovies().get(movieId)
+                        + " --- GENRES:" + this.dataController.getMovies().get(movieId).getGenres());
             }
         }
     }
 
+    // Show more specific info about one particular movie
     public void ratingsOfOneMovie(Scanner inputReader) {
         HashMap<Integer, Movie> movies = this.dataController.getMovies();
         HashMap<Integer, HashMap<Integer, Double>> movieRatings = this.dataController.getMovieRatings();
 
-        System.out.println();
-        System.out.println("Which movie are you interested in?");
+        System.out.println("\nWhich movie are you interested in?");
         System.out.print("Movie (id): ");
 
-        String cmd = inputReader.nextLine();
         try {
-            int movieId = Integer.parseInt(cmd);
+            int movieId = Integer.parseInt(inputReader.nextLine());
+
             if (!movieRatings.containsKey(movieId)) {
                 System.out.println("That movieId is not used in the database!");
             } else {
                 int numberOfRatings = 0;
                 double sumOfRatings = 0.0;
+
                 for (Double rating : movieRatings.get(movieId).values()) {
                     numberOfRatings++;
                     sumOfRatings += rating;
                 }
-                double avg = sumOfRatings / numberOfRatings;
+
+                double average = sumOfRatings / numberOfRatings;
 
                 System.out.println("\n*** MovieId " + movieId + " refers to: " + movies.get(movieId));
                 System.out.println("*** There are " + numberOfRatings + " ratings for the movie ");
-                System.out.println("*** The average score is " + String.format(Locale.US, "%.2f", avg));
+                System.out.println("*** The average score is " + String.format(Locale.US, "%.2f", average));
                 System.out.println("*** The ratings are the following:");
 
-                for (Integer i : movieRatings.get(movieId).keySet()) {
+                for (int userId : movieRatings.get(movieId).keySet()) {
                     System.out.println(
-                            " * User " + i + " gave a rating of " + movieRatings.get(movieId).get(i));
+                            " * User " + userId + " gave a rating of " + movieRatings.get(movieId).get(userId));
                 }
             }
         } catch (NumberFormatException e) {
@@ -144,109 +151,70 @@ public class UserInterface {
         }
     }
 
-    public void similarUsers(String name) {
-        HashMap<Integer, HashSet<Integer>> similarUsers = this.dataController.getSimilarUsers(name);
+    public void calculateRecommendationLists(Scanner inputReader) {
 
-        System.out.println("\n*** " + similarUsers.size() + " users have rated at least 4 movies that MovieNight user " + name + " also has rated");
-        System.out.println("*** Similar users and their ratings are the following:");
-        for (Integer i : similarUsers.keySet()) {
-            HashSet<Integer> s = similarUsers.get(i);
-            System.out.println(" * User " + i + " has rated movies " + Arrays.toString(s.toArray()));
+        System.out.println("\nDo you want to use the default values for calculations (yes/no)?");
+        System.out.println("Press 'x' to abort");
+        System.out.print("\nYour command: ");
+
+        String command = inputReader.nextLine();
+
+        if (command.equals("yes")) {
+            // initialize default coefficients
+            this.dataController.setCommonMovies(4);
+            this.dataController.setMinimumNumberOfSimilarUsers(10);
+            this.dataController.setGenreCoefficient(0.5);
+            this.dataController.setListSize(20);
+            // ... and calculate recommendation lists
+            this.dataController.calculateRecommendationLists();
+        } else if (command.equals("no")) {
+            // adjust values ...
+            adjustCalculationCoefficients(inputReader);
+            // ... and calculate recommendation lists
+            this.dataController.calculateRecommendationLists();
+        } else {
+            System.out.println("Unknown command. Try again. (press 'x' to abort)");
         }
 
     }
 
-    public void calculateRecommendationLists() {
-        HashSet<String> genres = new HashSet<>();
-        int amountOfMovies = Integer.MAX_VALUE;
+    public void adjustCalculationCoefficients(Scanner inputReader) {
+        try {
 
-        // we calculate the group recommendation list using borda count
-        HashMap<Integer, Integer> groupRecommendationList = new HashMap<>();
+            System.out.println(
+                    "\nHow many movies do a user X in the database have to have in common with a MovieNightUser to be considered when calculating similar users?");
+            System.out.println("Default value is 4.");
+            System.out.print("\nYour command: ");
 
-        HashMap<String, PriorityQueue<MovieRating>> userRecommendationLists = this.dataController
-                .getUserRecommendationLists();
+            int commonMovies = Integer.parseInt(inputReader.nextLine());
 
-        for (String name : this.dataController.getMovieNightUsers().keySet()) {
-            // first the 'similarUsers' function is used to calculate similar users
-            similarUsers(name);
-            // then the predictions are calculated for the MovieNightUser
-            this.dataController.calculatePredictions(name);
-            genres.add(this.dataController.getMovieNightUsers().get(name).getGenre());
+            System.out.println("\nAt least how many similar users each to-be-recommended movie should have?");
+            System.out.println("Default value is 10.");
+            System.out.print("\nYour command: ");
+
+            int minimumNumberOfSimilarUsers = Integer.parseInt(inputReader.nextLine());
+
+            System.out.println(
+                    "\nWhat should be the weighing coefficient when calculating the genre-weighted group recommendation list?");
+            System.out.println("Default value is 0.5.");
+            System.out.print("\nYour command: ");
+
+            double genreCoefficient = Double.parseDouble(inputReader.nextLine());
+
+            System.out.println("\nHow many movies do you wish to see in the final group recommendation lists?");
+            System.out.println("Default value is 20.");
+            System.out.print("\nYour command: ");
+
+            int listSize = Integer.parseInt(inputReader.nextLine());
+
+            this.dataController.setCommonMovies(commonMovies);
+            this.dataController.setMinimumNumberOfSimilarUsers(minimumNumberOfSimilarUsers);
+            this.dataController.setGenreCoefficient(genreCoefficient);
+            this.dataController.setListSize(listSize);
+        } catch (NumberFormatException e) {
+            System.out.println("\nYou did not enter a number!");
+            System.out.println("Default coefficients will be used.");
         }
-
-        for (String name : userRecommendationLists.keySet()) {
-            PriorityQueue<MovieRating> x = this.dataController.getUserRecommendationLists().get(name);
-            System.out.println("recommended movies for " + name + ": " + x.size());
-            if (x.size() < amountOfMovies) {
-                amountOfMovies = x.size();
-            }
-        }
-        System.out.println("smallest list:" + amountOfMovies);
-
-        for (String name : userRecommendationLists.keySet()) {
-            PriorityQueue<MovieRating> x = this.dataController.getUserRecommendationLists().get(name);
-            int n = 0;
-            while (n < amountOfMovies) {
-                if (x.isEmpty()) {
-                    break;
-                }
-                MovieRating m = x.poll();
-                if (groupRecommendationList.keySet().contains(m.getMovieId())) {
-                    int oldValue = groupRecommendationList.get(m.getMovieId());
-                    oldValue += (amountOfMovies - n);
-                    groupRecommendationList.put(m.getMovieId(), oldValue);
-                } else {
-                    groupRecommendationList.put(m.getMovieId(), (amountOfMovies - n));
-                }
-
-                System.out.println("Prediction: " + m.getRating() + " for " + m.getMovieId() + " "
-                        + this.dataController.getMovies().get(m.getMovieId()).getGenres());
-                n++;
-            }
-        }
-
-        HashMap<Integer, Integer> groupRecommendationListWithGenres = new HashMap<>(groupRecommendationList);
-
-        for (int movieId : groupRecommendationListWithGenres.keySet()) {
-            double extraPoints = 0;
-            ArrayList<String> movieGenres = this.dataController.getMovies().get(movieId).getGenres();
-            for (String s : movieGenres) {
-                if (genres.contains(s)) {
-                    extraPoints += 0.5 * amountOfMovies;
-                }
-            }
-
-            if (extraPoints > 0) {
-                int oldValue = groupRecommendationListWithGenres.get(movieId);
-                oldValue += Math.round(extraPoints);
-                groupRecommendationListWithGenres.put(movieId, oldValue);
-            } else {
-                int oldValue = groupRecommendationListWithGenres.get(movieId);
-                oldValue -= Math.round(0.5 * amountOfMovies);
-                groupRecommendationListWithGenres.put(movieId, oldValue);
-            }
-
-        }
-
-        LinkedHashMap<Integer, Integer> orderedGroupRecommendationList = new LinkedHashMap<>();
-        groupRecommendationList.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                .forEachOrdered(x -> orderedGroupRecommendationList.put(x.getKey(), x.getValue()));
-
-        LinkedHashMap<Integer, Integer> orderedGroupRecommendationListWithGenres = new LinkedHashMap<>();
-        groupRecommendationListWithGenres.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-                .forEachOrdered(x -> orderedGroupRecommendationListWithGenres.put(x.getKey(), x.getValue()));
-
-        for (int x : orderedGroupRecommendationList.keySet()) {
-            System.out.println("group prediction " + orderedGroupRecommendationList.get(x) + " for movie " + x + " "
-                    + this.dataController.getMovies().get(x).getGenres());
-        }
-
-        for (int x : orderedGroupRecommendationListWithGenres.keySet()) {
-            System.out.println("group prediction " + orderedGroupRecommendationListWithGenres.get(x) + " for movie " + x
-                    + " " + this.dataController.getMovies().get(x).getGenres());
-        }
-        // System.out.println(orderedGroupRecommendationList);
     }
 
 }
