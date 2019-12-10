@@ -19,24 +19,6 @@ public class MainController {
     // MovieNightUsers (name is the HashMap key)
     private HashMap<String, MovieNightUser> movieNightUsers;
 
-    /* 11111111
-    // movies and their ratings in the dataset (movieId is the HashMap key)
-    // for each movie in the dataset the rating is saved
-    // movieId is the 'outer' HashMap key.
-    // for the 'inner' HashMap the user id is the key
-    private HashMap<Integer, HashMap<Integer, Double>> movieRatings;
-    */
-
-    /* 1111111
-    // movies and their titles (movieId is the HashMap key)
-    private HashMap<Integer, Movie> movies;
-    */
-
-    /*
-    // users and which movies they have rated (userId is the HashMap key)
-    private HashMap<Integer, HashMap<Integer, Double>> userRatings;
-    */
-
     // here the individual recommendation lists are saved
     private HashMap<String, PriorityQueue<MovieRating>> userRecommendationLists;
     
