@@ -29,6 +29,9 @@ public class DataController {
     // users and which movies they have rated (userId is the HashMap key)
     private HashMap<Integer, HashMap<Integer, Double>> userRatings;
 
+    // here the individual recommendation lists are saved
+    private HashMap<String, PriorityQueue<MovieRating>> userRecommendationLists;
+
     public HashMap<Integer, HashMap<Integer, Double>> getMovieRatings() {
         return this.movieRatings;
     }
@@ -45,11 +48,16 @@ public class DataController {
         return this.movieNightUsers;
     }
 
+    public HashMap<String, PriorityQueue<MovieRating>> getUserRecommendationLists() {
+        return this.userRecommendationLists;
+    }
+
     public DataController() {
         this.movieRatings = new HashMap<>();
         this.movies = new HashMap<>();
         this.userRatings = new HashMap<>();
         this.movieNightUsers = new HashMap<>();
+        this.userRecommendationLists = new HashMap<>();
 
         // let's load the ratings (userId + movieId + rating)
         loadRatingsData();
@@ -90,6 +98,7 @@ public class DataController {
         list3.put(1717, 1.0); // Scream 2
 
         this.movieNightUsers.put("Karvinen", new MovieNightUser("Karvinen", list3, "Drama"));
+        
     }
 
     public void loadRatingsData() {
@@ -309,7 +318,7 @@ public class DataController {
             sum += r;
         }
         double avg = sum / numberOfRatings;
-        System.out.println("average of " + movieNightUserName + "is " + avg);
+        //System.out.println("average of " + movieNightUserName + " is: " + avg);
 
         for (Integer movieId : moviesNotSeen) {
             PriorityQueue<UserSimilarity> copyOfSimilarUsers = new PriorityQueue<>(similarUsers);
@@ -377,16 +386,20 @@ public class DataController {
 
         }
 
-        System.out.println("recommended movies: " + recommendedMovies.size());
-        int n = 0;
-        while (n < 25) {
-            if (recommendedMovies.isEmpty()) {
-                break;
-            }
-            MovieRating m = recommendedMovies.poll();
-            System.out.println("Prediction: " + m.getRating() + " for " + m.getMovieId() + " " + this.movies.get(m.getMovieId()).getGenres());
-            n++;
-        }
+        // Here we can list the predictions 
+        //System.out.println("recommended movies: " + recommendedMovies.size());
+        //int n = 0;
+        //while (n < 25) {
+        //    if (recommendedMovies.isEmpty()) {
+        //        break;
+        //   }
+        //    MovieRating m = recommendedMovies.poll();
+        //    System.out.println("Prediction: " + m.getRating() + " for " + m.getMovieId() + " " + this.movies.get(m.getMovieId()).getGenres());
+        //    n++;
+        //}
+
+        // let's add the list to the collection of lists
+        this.userRecommendationLists.put(movieNightUserName, recommendedMovies);
     }
 
 }
