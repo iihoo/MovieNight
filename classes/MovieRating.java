@@ -1,7 +1,7 @@
 package classes;
 
 // Each MovieRating includes the movie id and a rating
-public class MovieRating implements Comparable<MovieRating>{
+public class MovieRating implements Comparable<MovieRating> {
     private int movieId;
     private double rating;
 
@@ -10,8 +10,8 @@ public class MovieRating implements Comparable<MovieRating>{
         this.rating = r;
     }
 
-    public double getRating() {
-        return this.rating;
+    public void setMovieId(int p) {
+        this.movieId = p;
     }
 
     public int getMovieId() {
@@ -22,10 +22,12 @@ public class MovieRating implements Comparable<MovieRating>{
         this.rating = r;
     }
 
-    public void setMovieId(int p) {
-        this.movieId = p;
+    public double getRating() {
+        return this.rating;
     }
 
+    // the MovieRatings are compared according to the rating value of the MovieRatings
+    // and that is how it is possible to arrange a set of MovieRatings according to their ratings
     @Override
     public int compareTo(MovieRating m) {
         if (this.rating > m.rating) {
@@ -35,7 +37,6 @@ public class MovieRating implements Comparable<MovieRating>{
         } else {
             return 0;
         }
-        
     }
 
     @Override

@@ -42,7 +42,9 @@ public class MainController {
         this.minimumNumberOfSimilarUsers = 10;
         this.genreCoefficient = 0.5;
         this.listSize = 20;
+    }
 
+    public void loadData() {
         // let's load the ratings
         this.dataController.loadRatingsData();
 
@@ -370,7 +372,7 @@ public class MainController {
             HashMap<Integer, Integer> withGenre) {
 
         System.out.println("\n*** The calculation coefficients were: ");
-        System.out.println(" * Minimum amount of common movies between user X and a MovieNightUser: "+ this.commonMovies);
+        System.out.println(" * Minimum number of common movies rated between a MovieNightUser and a user X in the database: "+ this.commonMovies);
         System.out.println(" * Minimum number of similar users for each to-be-recommended movie: " + this.minimumNumberOfSimilarUsers);
         System.out.println(" * Genre coefficient for group recommendation list calculations: " + this.genreCoefficient);
         System.out.println(" * Recommendation list size (for printing): " + this.listSize);

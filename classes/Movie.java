@@ -12,12 +12,12 @@ public class Movie {
         this.genres = genres;
     }
 
-    public String getTitle() {
-        return this.title;
-    }
-
     public void setTitle(String t) {
         this.title = t;
+    }
+
+    public String getTitle() {
+        return this.title;
     }
 
     public ArrayList<String> getGenres() {

@@ -11,10 +11,11 @@ public class MovieNightUI {
     private MainController controller;
 
     public MovieNightUI() {
+        this.controller = new MainController();
     }
 
     public void start() {
-        this.controller = new MainController();
+        this.controller.loadData();
 
         // let's add a couple of test users for the system
         HashMap<String, MovieNightUser> movieNightUsers = new HashMap<>();
