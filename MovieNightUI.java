@@ -58,7 +58,7 @@ public class MovieNightUI {
         list4.put(6373, 1.5); // Bruce Almighty
         list4.put(1721, 2.0); // Titanic
         list4.put(7439, 2.5); // Punisher
-        movieNightUsers.put("Aku", new MovieNightUser("Lupu", list4, "Crime"));
+        movieNightUsers.put("Aku", new MovieNightUser("Aku", list4, "Crime"));
 
         this.controller.setMovieNightUsers(movieNightUsers);
 
@@ -159,7 +159,7 @@ public class MovieNightUI {
 
         if (command.equals("yes")) {
             // initialize default coefficients
-            this.controller.setCommonMovies(4);
+            this.controller.setNumberOfMoviesInCommon(4);
             this.controller.setMinimumNumberOfSimilarUsers(10);
             this.controller.setGenreCoefficient(0.5);
             this.controller.setListSize(20);
@@ -184,7 +184,7 @@ public class MovieNightUI {
             System.out.println("Default value is 4.");
             System.out.print("\nYour command: ");
 
-            int commonMovies = Integer.parseInt(inputReader.nextLine());
+            int numberOfMoviesInCommon = Integer.parseInt(inputReader.nextLine());
 
             System.out.println("\nAt least how many similar users each to-be-recommended movie should have?");
             System.out.println("Default value is 10.");
@@ -206,7 +206,7 @@ public class MovieNightUI {
             int listSize = Integer.parseInt(inputReader.nextLine());
 
             // if all parameters have been successfully selected, they are saved to Controller
-            this.controller.setCommonMovies(commonMovies);
+            this.controller.setNumberOfMoviesInCommon(numberOfMoviesInCommon);
             this.controller.setMinimumNumberOfSimilarUsers(minimumNumberOfSimilarUsers);
             this.controller.setGenreCoefficient(genreCoefficient);
             this.controller.setListSize(listSize);

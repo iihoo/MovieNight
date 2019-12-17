@@ -12,6 +12,8 @@ import java.util.PriorityQueue;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Comparator;
+// for individual recommendation list printing
+//import java.util.Locale;
 
 public class MainController {
     private DataController dataController;
@@ -26,19 +28,19 @@ public class MainController {
     // default values are initialized but the user is provided with the possibility to adjust them
 
     // at least how many movies have to be in common with the MovieNightUser (default value = 4)
+    private int numberOfMoviesInCommon;
     // at least how many similar users each to-be-recommended movies should have (default value = 10) 
-    // what is the weighing value that used when calculating the genre-weighted group recommendation list (default value = 0.5)
-    // how many movies do you wish to see in the list (default value = 20)
-    private int commonMovies;
     private int minimumNumberOfSimilarUsers;
+    // what is the weighing value that used when calculating the genre-weighted group recommendation list (default value = 0.5)
     private double genreCoefficient;
+    // how many movies do you wish to see in the final list (default value = 20)
     private int listSize;
 
     public MainController() {
         this.dataController = new DataController();
         this.movieNightUsers = new HashMap<>();
         this.userRecommendationLists = new HashMap<>();
-        this.commonMovies = 4;
+        this.numberOfMoviesInCommon = 4;
         this.minimumNumberOfSimilarUsers = 10;
         this.genreCoefficient = 0.5;
         this.listSize = 20;
@@ -68,12 +70,12 @@ public class MainController {
         this.userRecommendationLists = lists;
     }
 
-    public int getCommonMovies() {
-        return this.commonMovies;
+    public int getNumberOfMoviesInCommon() {
+        return this.numberOfMoviesInCommon;
     }
 
-    public void setCommonMovies(int n) {
-        this.commonMovies = n;
+    public void setNumberOfMoviesInCommon(int n) {
+        this.numberOfMoviesInCommon = n;
     }
 
     public int getMinimumNumberOfSimilarUsers() {
@@ -121,7 +123,7 @@ public class MainController {
         }
 
         // let's check which users in the data set have rated the same movies
-        // NOTE at least 4 movies have to be the same
+        // NOTE at least x (= numberOfMoviesInCommon) movies have to be the same
         for (Integer i : userRatings.keySet()) {
             // 'commonMovies' is a set of movies that are common with the two users
             // 'uncommonMovies' is a set of movies that are not seen by the MovieNightUser
@@ -144,7 +146,7 @@ public class MainController {
             // MovieNightUser (this is only done with users that have at least 'commonMovies' amount movies
             // in common with the MovieNightUser)
             commonMovies.retainAll(s);
-            if (commonMovies.size() >= this.commonMovies) {
+            if (commonMovies.size() >= this.numberOfMoviesInCommon) {
                 similarUsers.put(i, commonMovies);
                 uncommonMovies.removeAll(s);
                 moviesNotSeen.addAll(uncommonMovies);
@@ -220,7 +222,7 @@ public class MainController {
 
         for (Integer movieId : moviesNotSeen) {
             PriorityQueue<UserSimilarity> copyOfSimilarUsers = new PriorityQueue<>(similarUsers);
-            HashSet<UserSimilarity> topThreeSimilarUsers = new HashSet<>();
+            HashSet<UserSimilarity> movie_SimilarUsers = new HashSet<>();
             // while loop goes through the priority queue until empty OR as long
             // as the similarity value is positive
             while (true) {
@@ -231,18 +233,17 @@ public class MainController {
                     break;
                 } else {
                     if (movieRatings.get(movieId).containsKey(u.getUserId())) {
-                        topThreeSimilarUsers.add(u);
+                        movie_SimilarUsers.add(u);
                     }
                 }
             }
 
-            // lasketaan arvosana niille elokuville, joille löytyy vähintään 10 samanlaista
-            // käyttäjää
-            // MovieNightUser-käyttäjän kanssa
-            if (topThreeSimilarUsers.size() >= this.minimumNumberOfSimilarUsers) {
+            // lasketaan arvosana niille elokuville, joille löytyy vähintään x = minimumNumberOfSimilarUsers
+            // samanlaista käyttäjää MovieNightUser-käyttäjän kanssa
+            if (movie_SimilarUsers.size() >= this.minimumNumberOfSimilarUsers) {
                 double dividend = 0.0;
                 double denominator = 0.0;
-                for (UserSimilarity topUser : topThreeSimilarUsers) {
+                for (UserSimilarity topUser : movie_SimilarUsers) {
                     Double similarityValue = topUser.getPearson();
                     Double ratingValue = movieRatings.get(movieId).get(topUser.getUserId());
 
@@ -257,7 +258,7 @@ public class MainController {
                     denominator += similarityValue;
                 }
                 double prediction = avg + (dividend / denominator);
-                if (prediction - 5 > 0) {
+                if (prediction > 5) {
                     prediction = 5;
                 }
                 recommendedMovies.add(new MovieRating(movieId, prediction));
@@ -265,20 +266,23 @@ public class MainController {
 
         }
 
-         //Here we can list the predictions
-         //System.out.println("recommended movies: " + recommendedMovies.size());
-         //int n = 0;
-         //while (n < 25) {
-         //if (recommendedMovies.isEmpty()) {
-         //break;
-         //}
-         //MovieRating m = recommendedMovies.poll();
-         //System.out.println("Prediction: " + m.getRating() + " for " + m.getMovieId()
-         //+ " " + this.dataController.getMovies().get(m.getMovieId()).getGenres());
-         //n++;
-         //}
+        // Here we can list the predictions
+        //PriorityQueue<MovieRating> recommendedMoviesForPrinting = new PriorityQueue<>(recommendedMovies);
+        //System.out.println("\n*** Recommended movies for: " + movieNightUserName);
+        //int n = 0;
+        //while (n < 25) {
+        //    if (recommendedMoviesForPrinting.isEmpty()) {
+        //        break;
+        //    }
+        //    MovieRating movieRating = recommendedMoviesForPrinting.poll();
+        //    Movie movie = this.dataController.getMovies().get(movieRating.getMovieId());
+        //    System.out.println("[" + (n+1) + "] " + String.format(Locale.US, "%.2f", movieRating.getRating()) + " for movieId:" + movieRating.getMovieId() + " = " + movie.getTitle()
+        //    + " " + movie.getGenres());
+        //    n++;
+        //}
 
         // let's add the list to the collection of lists
+        System.out.println("===> There are " + recommendedMovies.size() + " movie predictions for " + movieNightUserName);
         this.userRecommendationLists.put(movieNightUserName, recommendedMovies);
     }
 
@@ -312,7 +316,6 @@ public class MainController {
                 amountOfMovies = x.size();
             }
         }
-        //System.out.println("smallest list:" + amountOfMovies);
 
         for (String name : userRecommendationLists.keySet()) {
             PriorityQueue<MovieRating> x = this.userRecommendationLists.get(name);
@@ -371,13 +374,13 @@ public class MainController {
     public void GroupLists(HashMap<Integer, Integer> withoutGenre,
             HashMap<Integer, Integer> withGenre) {
 
-        System.out.println("\n*** The calculation coefficients were: ");
-        System.out.println(" * Minimum number of common movies rated between a MovieNightUser and a user X in the database: "+ this.commonMovies);
+        System.out.println("\n*** The calculation coefficients for group recommendation calculations are: ");
+        System.out.println(" * Minimum number of common movies rated between a MovieNightUser and a user X in the database: "+ this.numberOfMoviesInCommon);
         System.out.println(" * Minimum number of similar users for each to-be-recommended movie: " + this.minimumNumberOfSimilarUsers);
         System.out.println(" * Genre coefficient for group recommendation list calculations: " + this.genreCoefficient);
         System.out.println(" * Recommendation list size (for printing): " + this.listSize);
         
-        System.out.println("\n*** The MovieNight users and their genre preferences were:");
+        System.out.println("\n*** The MovieNight users and their genre preferences are:");
         for (String name : this.movieNightUsers.keySet()) {
             System.out.println(" * " + name + " prefers " + this.movieNightUsers.get(name).getGenre());
         }
