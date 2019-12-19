@@ -15,52 +15,11 @@ public class MovieNightUI {
     }
 
     public void start() {
+        // let's load the ratings data
         this.controller.loadData();
 
-        // let's add a couple of test users for the system
-        HashMap<String, MovieNightUser> movieNightUsers = new HashMap<>();
-
-        HashMap<Integer, Double> list1 = new HashMap<>();
-        list1.put(1, 2.5); // Toy Story
-        list1.put(2, 4.0); // Jumanji
-        list1.put(19, 5.0); // Ace Ventura
-        list1.put(32, 3.5); // 12 Monkeys
-        list1.put(48, 0.5); // Pocahontas
-        list1.put(224, 2.0); // Don Juan DeMarco
-        list1.put(949, 1.5); // East of Eden
-        movieNightUsers.put("Tupu", new MovieNightUser("Tupu", list1, "Romance"));
-
-        HashMap<Integer, Double> list2 = new HashMap<>();
-        list2.put(1, 4.0); // Toy Story
-        list2.put(19, 2.0); // Ace Venture
-        list2.put(48, 4.5); // Pocahontas
-        list2.put(79132, 3.0); // Inception
-        list2.put(193609, 0.5); // Andrew Dice Clay
-        list2.put(2085, 4.0); // 101 Dalmatians
-        list2.put(2382, 2.5); // Police Academy 5
-        movieNightUsers.put("Hupu", new MovieNightUser("Hupu", list2, "Drama"));
-
-        HashMap<Integer, Double> list3 = new HashMap<>();
-        list3.put(1, 2.5); // Toy Story
-        list3.put(19, 3.0); // Ace Venture
-        list3.put(189713, 3.5); // BlacKkKlansman
-        list3.put(32, 5.0); // 12 Monkeys
-        list3.put(104, 5.0); // Happy Gilmore
-        list3.put(1721, 0.5); // Titanic
-        list3.put(1717, 1.0); // Scream 2
-        movieNightUsers.put("Lupu", new MovieNightUser("Lupu", list3, "Comedy"));
-
-        HashMap<Integer, Double> list4 = new HashMap<>();
-        list4.put(6711, 4.5); // Lost in Translation
-        list4.put(19, 2.5); // Ace Venture
-        list4.put(189713, 4.0); // BlacKkKlansman
-        list4.put(32, 3.0); // 12 Monkeys
-        list4.put(6373, 1.5); // Bruce Almighty
-        list4.put(1721, 2.0); // Titanic
-        list4.put(7439, 2.5); // Punisher
-        movieNightUsers.put("Aku", new MovieNightUser("Aku", list4, "Crime"));
-
-        this.controller.setMovieNightUsers(movieNightUsers);
+        // let's initialize the system with predetermined test users
+        initializeMovieNightUsers();
 
         // let's start the program
         Scanner inputReader = new Scanner(System.in);
@@ -71,6 +30,7 @@ public class MovieNightUI {
             System.out.println("------------------------------------------------");
             System.out.println("Commands: ");
             System.out.println(" x - stop the application");
+            System.out.println(" 0 - add MovieNight users and ratings");
             System.out.println(" 1 - show general info");
             System.out.println(" 2 - show ratings info for a specific movie");
             System.out.println(" 3 - show ratings info by the MovieNight users");
@@ -82,18 +42,65 @@ public class MovieNightUI {
 
             if (command.equals("x")) {
                 break;
-            }
-
-            if (command.equals("1")) {
+            } else if (command.equals("0")) {
+                addMovieNightUsers(inputReader);
+            } else if (command.equals("1")) {
                 generalInfo(inputReader);
             } else if (command.equals("2")) {
                 ratingsOfOneMovie(inputReader);
             } else if (command.equals("3")) {
-                ratingsOfMovieNightUsers(inputReader);
+                ratingsOfMovieNightUsers();
             } else if (command.equals("4")) {
                 calculateRecommendationLists(inputReader);
             } else {
                 System.out.println("Unknown command. Try again. (press 'x' to stop the application)");
+            }
+        }
+    }
+
+    // Add MovieNight users to the system
+    public void addMovieNightUsers(Scanner inputReader) {
+        System.out.println("\nDo you want to initialize the system with predetermined users? (yes/no)");
+        System.out.println("NOTE: 'yes' will remove any existing MovieNight users from the system.");
+        System.out.print("Your command: ");
+        String command = inputReader.nextLine();
+        if (command.equals("yes")) {
+            initializeMovieNightUsers();
+        } else if (command.equals("no")) {
+            while (true) {
+                System.out.println("\nFor who do you want to add a rating or genre preference?");
+                System.out.println(" - if you want to see existing MovieNight user rating for reference, press 0");
+                System.out.println(" - if you done with adding MovieNight user ratings, press x");
+                System.out.print("\nInsert name: ");
+                String name = inputReader.nextLine();
+                if (name.equals("0")) {
+                    ratingsOfMovieNightUsers();
+                } else if (name.equals("x")) {
+                    break;
+                } else {
+                    while (true) {
+                        System.out.println("\n... adding ratings for MovieNight user " + name);
+                        System.out.print("Insert movie (movieId) of press 'g' for genre addition (or 'x' to stop): ");
+                        String cmd = inputReader.nextLine();
+                        if (cmd.equals("x")) {
+                            break;
+                        } else if (cmd.equals("g")) {
+                            System.out.println("Allowed genres: Action/Adventure/Animation/Children's/Comedy/Crime/Documentary/Drama/Fantasy/Film-Noir/Horror/Musical/Mystery/Romance/Sci-Fi/Thriller/War/Western");
+                            System.out.print("Insert genre: ");
+                            String genre = inputReader.nextLine();
+                            this.controller.addMovieNightUserGenre(name, genre);
+                        } else {
+                            try {
+                                int movieId = Integer.parseInt(cmd);
+                                System.out.print("Insert rating (0.5-5.0 with half-star increments): ");
+                                double rating = Double.parseDouble(inputReader.nextLine());
+                                this.controller.addMovieNightUserRating(name, movieId, rating);
+                            } catch (NumberFormatException e) {
+                                System.out.println("You did not enter a valid number for movieId or rating!");
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -155,7 +162,7 @@ public class MovieNightUI {
     }
 
     // Show ratings info by the MovieNight users
-    public void ratingsOfMovieNightUsers(Scanner inputReader) {
+    public void ratingsOfMovieNightUsers() {
         HashMap<String, MovieNightUser> movieNightUsers = this.controller.getMovieNightUsers();
         HashMap<Integer, Movie> movies = this.controller.getMovies();
 
@@ -234,6 +241,57 @@ public class MovieNightUI {
             System.out.println("\nYou did not enter a number!");
             System.out.println("Default coefficients will be used.");
         }
+    }
+
+    public void initializeMovieNightUsers() {
+        // first let's remove the existing MovieNight users if there are any
+        this.controller.setMovieNightUsers(new HashMap<>());
+
+        // let's initialize the system with predetermined MovieNight users and their
+        // ratings
+        HashMap<String, MovieNightUser> movieNightUsers = new HashMap<>();
+
+        HashMap<Integer, Double> ratings1 = new HashMap<>();
+        ratings1.put(1, 2.5); // Toy Story
+        ratings1.put(2, 4.0); // Jumanji
+        ratings1.put(19, 5.0); // Ace Ventura
+        ratings1.put(32, 3.5); // 12 Monkeys
+        ratings1.put(48, 0.5); // Pocahontas
+        ratings1.put(224, 2.0); // Don Juan DeMarco
+        ratings1.put(949, 1.5); // East of Eden
+        movieNightUsers.put("Tupu", new MovieNightUser("Tupu", ratings1, "Romance"));
+
+        HashMap<Integer, Double> ratings2 = new HashMap<>();
+        ratings2.put(1, 4.0); // Toy Story
+        ratings2.put(19, 2.0); // Ace Venture
+        ratings2.put(48, 4.5); // Pocahontas
+        ratings2.put(79132, 3.0); // Inception
+        ratings2.put(193609, 0.5); // Andrew Dice Clay
+        ratings2.put(2085, 4.0); // 101 Dalmatians
+        ratings2.put(2382, 2.5); // Police Academy 5
+        movieNightUsers.put("Hupu", new MovieNightUser("Hupu", ratings2, "Drama"));
+
+        HashMap<Integer, Double> ratings3 = new HashMap<>();
+        ratings3.put(1, 2.5); // Toy Story
+        ratings3.put(19, 3.0); // Ace Venture
+        ratings3.put(189713, 3.5); // BlacKkKlansman
+        ratings3.put(32, 5.0); // 12 Monkeys
+        ratings3.put(104, 5.0); // Happy Gilmore
+        ratings3.put(1721, 0.5); // Titanic
+        ratings3.put(1717, 1.0); // Scream 2
+        movieNightUsers.put("Lupu", new MovieNightUser("Lupu", ratings3, "Comedy"));
+
+        HashMap<Integer, Double> ratings4 = new HashMap<>();
+        ratings4.put(6711, 4.5); // Lost in Translation
+        ratings4.put(19, 2.5); // Ace Venture
+        ratings4.put(189713, 4.0); // BlacKkKlansman
+        ratings4.put(32, 3.0); // 12 Monkeys
+        ratings4.put(6373, 1.5); // Bruce Almighty
+        ratings4.put(1721, 2.0); // Titanic
+        ratings4.put(7439, 2.5); // Punisher
+        movieNightUsers.put("Aku", new MovieNightUser("Aku", ratings4, "Crime"));
+
+        this.controller.setMovieNightUsers(movieNightUsers);
     }
 
 }

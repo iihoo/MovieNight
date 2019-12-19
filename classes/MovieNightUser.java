@@ -22,6 +22,14 @@ public class MovieNightUser {
         this.recommendedMovies = new PriorityQueue<>();
     }
 
+    public MovieNightUser(String nimi) {
+        this.nimi = nimi;
+        this.movieratings = new HashMap<>();
+        this.userSimilarity = new PriorityQueue<>();
+        this.moviesNotSeen = new HashSet<>();
+        this.recommendedMovies = new PriorityQueue<>();
+    }
+
     public void setNimi(String name) {
         this.nimi = name;
     }
@@ -68,6 +76,10 @@ public class MovieNightUser {
 
     public PriorityQueue<MovieRating> getRecommendedMovies() {
         return this.recommendedMovies;
+    }
+
+    public void addRating(int movieId, double rating) {
+        this.movieratings.put(movieId, rating);
     }
 
 }
