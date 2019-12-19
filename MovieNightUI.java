@@ -66,14 +66,17 @@ public class MovieNightUI {
         Scanner inputReader = new Scanner(System.in);
         while (true) {
 
-            System.out.println("\n-----------------------------------------------");
+            System.out.println("\n================================================");
+            System.out.println("*            MOVIE NIGHT application           *");
+            System.out.println("------------------------------------------------");
             System.out.println("Commands: ");
             System.out.println(" x - stop the application");
             System.out.println(" 1 - show general info");
             System.out.println(" 2 - show ratings info for a specific movie");
-            System.out.println(" 3 - show recommendation lists");
-            System.out.println("-----------------------------------------------\n");
-            System.out.print("Your command: ");
+            System.out.println(" 3 - show ratings info by the MovieNight users");
+            System.out.println(" 4 - show recommendation lists");
+            System.out.println("================================================");
+            System.out.print("\nYour command: ");
 
             String command = inputReader.nextLine();
 
@@ -86,6 +89,8 @@ public class MovieNightUI {
             } else if (command.equals("2")) {
                 ratingsOfOneMovie(inputReader);
             } else if (command.equals("3")) {
+                ratingsOfMovieNightUsers(inputReader);
+            } else if (command.equals("4")) {
                 calculateRecommendationLists(inputReader);
             } else {
                 System.out.println("Unknown command. Try again. (press 'x' to stop the application)");
@@ -149,6 +154,21 @@ public class MovieNightUI {
         }
     }
 
+    // Show ratings info by the MovieNight users
+    public void ratingsOfMovieNightUsers(Scanner inputReader) {
+        HashMap<String, MovieNightUser> movieNightUsers = this.controller.getMovieNightUsers();
+        HashMap<Integer, Movie> movies = this.controller.getMovies();
+
+        for (String name : movieNightUsers.keySet()) {
+            HashMap<Integer, Double> ratings = movieNightUsers.get(name).getMovieRatings();
+            System.out.println("\n*** MovieNight user " + name + " has rated the following movies: ");
+            for (int movieId : ratings.keySet()) {
+                System.out.println(" * Rating " + ratings.get(movieId) + " for movie: " + movies.get(movieId));
+            }
+            System.out.println(" * " + name + "'s genre preference: " + movieNightUsers.get(name).getGenre());
+        }
+    }
+
     public void calculateRecommendationLists(Scanner inputReader) {
 
         System.out.println("\nDo you want to use the default values for calculations (yes/no)?");
@@ -205,7 +225,7 @@ public class MovieNightUI {
 
             int listSize = Integer.parseInt(inputReader.nextLine());
 
-            // if all parameters have been successfully selected, they are saved to Controller
+            // if all parameters have been successfully selected, they are saved
             this.controller.setNumberOfMoviesInCommon(numberOfMoviesInCommon);
             this.controller.setMinimumNumberOfSimilarUsers(minimumNumberOfSimilarUsers);
             this.controller.setGenreCoefficient(genreCoefficient);
